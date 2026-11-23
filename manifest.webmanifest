@@ -1,0 +1,13 @@
+{
+  "name": "RADTECH PIXEL — The X-Ray Chronicles",
+  "short_name": "RADTECH PIXEL",
+  "description": "A fictional radiography learning simulation for students.",
+  "lang": "th",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#101735",
+  "theme_color": "#101b4a",
+  "icons": [{"src":"icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
