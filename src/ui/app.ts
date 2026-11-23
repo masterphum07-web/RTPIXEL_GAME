@@ -43,9 +43,8 @@ function worldScreen(){
     <header class="rpg-hud"><div class="player-card"><img src="${base}assets/student-portrait.png" alt="นักศึกษารังสีเทคนิค"/><div class="player-stats"><b>Lv.${Math.floor(profile.xp/100)+1} &nbsp; Radiography Student</b><div class="exp-label">EXP <span>${profile.xp%100} / 100</span></div><div class="exp-track"><i style="width:${profile.xp%100}%"></i></div></div></div><div class="hud-right"><div class="heart-counter"><span>♥</span><b>100</b></div><div class="coin-counter"><i>✦</i><b>${profile.coins}</b></div><button class="pixel-gear" data-view="results" title="บันทึกการฝึก">⚙</button></div></header>
     <aside class="main-quest rpg-window"><div class="quest-title"><span class="quest-glyph">▤</span><b>Main Mission</b></div><div class="quest-step"><i></i><span>${profile.questStep>=5?'เควสต์แรกสำเร็จแล้ว':questObjective()}</span></div><div class="quest-mini-progress"><i style="width:${Math.min(100,profile.questStep*20)}%"></i></div></aside>
     <aside class="hospital-map rpg-window"><b>Hospital Map</b><div class="map-grid"><i class="map-building"></i><i class="map-garden"></i><i class="map-walk"></i><i class="map-pin">◆</i></div></aside>
-    <div class="door-marker">✦</div><div class="interaction-label">${interactLabel}</div>
     <div class="world-controls"><span>WASD / ← ↑ ↓ → เดิน</span><span><kbd>E</kbd> โต้ตอบ</span></div>
-    <div class="touch-pad"><button data-move="up">▲</button><div><button data-move="left">◀</button><button data-move="down">▼</button><button data-move="right">▶</button></div><button class="touch-interact" data-action="touch-interact">E</button></div>
+    <div class="touch-pad"><button data-move="up" aria-label="เดินขึ้น">▲</button><div><button data-move="left" aria-label="เดินซ้าย">◀</button><button data-move="down" aria-label="เดินลง">▼</button><button data-move="right" aria-label="เดินขวา">▶</button></div><button class="touch-interact" data-action="touch-interact" aria-label="${interactLabel}" title="${interactLabel}">E</button></div>
     <nav class="rpg-dock"><button data-action="inventory"><span class="dock-icon">▣</span><b>Bag</b></button><button data-view="library"><span class="dock-icon">⚑</span><b>Quest</b></button><button data-view="skills"><span class="dock-icon">★</span><b>Skills</b></button><button data-view="learn"><span class="dock-icon">▤</span><b>Learning</b></button></nav>
     <aside class="mentor-dialog rpg-window"><img src="${base}assets/mentor-portrait.png" alt="พี่มายา"/><div><b>${dialogueName}</b><p>${dialogueKind==='welcome'?text:dialogueText||text}</p>${dialogueKind==='mentor'&&profile.questStep===0?'<button class="dialogue-action" data-action="accept-quest">รับเควสต์ · FIRST DAY →</button>':''}${dialogueKind==='reception'&&profile.questStep===1?'<button class="dialogue-action" data-action="accept-referral">รับใบส่งตรวจ →</button>':''}${dialogueKind==='radiology-door'&&profile.questStep>=2&&profile.questStep<4?`<button class="dialogue-action" data-start="${activeCase.id}">เข้าเคส Chest PA →</button>`:''}<button class="dialogue-next" data-action="close-dialogue">▼</button></div></aside>
     ${panel}${menu?'<button class="modal-backdrop" data-view="hub" aria-label="ปิดหน้าต่าง"></button>':''}
@@ -89,6 +88,7 @@ function bindRpg(){
   root.querySelectorAll<HTMLInputElement>('[data-toggle]').forEach(el=>el.addEventListener('change',()=>{technique[el.dataset.toggle as 'grid'|'aec']=el.checked;render();}));
   root.querySelectorAll<HTMLElement>('[data-action]').forEach(el=>el.addEventListener('click',()=>{
     const action=el.dataset.action;
+    if(action==='touch-interact')return;
     if(action==='accept-quest'){profile.questStep=1;dialogueKind='mentor';dialogueName='MAYA · SENIOR TECHNOLOGIST';dialogueText='เริ่มภารกิจแล้ว! ไปที่ Reception เพื่อรับใบส่งตรวจจำลอง แล้วนำไปที่ห้อง X-ray';save();}
     else if(action==='accept-referral'){profile.questStep=2;dialogueKind='reception';dialogueName='RECEPTION';dialogueText='รับใบส่งตรวจจำลองแล้ว ตรวจรายการให้ครบ จากนั้นเดินไปที่ประตู RADIOLOGY';save();}
     else if(action==='close-dialogue'){dialogueKind='welcome';dialogueText='';}
@@ -105,6 +105,26 @@ function bindRpg(){
     else if(action==='reset'){localStorage.removeItem(SAVE_KEY);location.reload();return;}
     render();
   }));
+  const interactControl=root.querySelector<HTMLButtonElement>('[data-action="touch-interact"]');
+  if(interactControl){
+    let held=false;
+    const release=()=>{if(!held)return;held=false;window.removeEventListener('pointerup',release);window.removeEventListener('pointercancel',release);window.removeEventListener('blur',release);gameRef?.events.emit('virtual-interact',false);};
+    interactControl.addEventListener('pointerdown',(event:PointerEvent)=>{
+      if(held)return;
+      event.preventDefault();held=true;
+      try{interactControl.setPointerCapture(event.pointerId);}catch{}
+      gameRef?.events.emit('virtual-interact',true);
+      window.addEventListener('pointerup',release);
+      window.addEventListener('pointercancel',release);
+      window.addEventListener('blur',release);
+    });
+    interactControl.addEventListener('lostpointercapture',release);
+    interactControl.addEventListener('click',(event:MouseEvent)=>{
+      if(event.detail!==0)return;
+      gameRef?.events.emit('virtual-interact',true);
+      requestAnimationFrame(()=>gameRef?.events.emit('virtual-interact',false));
+    });
+  }
   root.querySelectorAll<HTMLElement>('[data-move]').forEach(el=>{const direction=el.dataset.move!;const down=(event:Event)=>{event.preventDefault();gameRef?.events.emit('virtual-move',direction,true);};const up=(event:Event)=>{event.preventDefault();gameRef?.events.emit('virtual-move',direction,false);};el.addEventListener('pointerdown',down);el.addEventListener('pointerup',up);el.addEventListener('pointerleave',up);el.addEventListener('pointercancel',up);});
 }
 function startCase(id:string){activeCase=CASES.find(c=>c.id===id&&unlocked(c))||CASES[0];if(profile.questStep===2)profile.questStep=3;view='mission';step=0;verified=positioned=collimated=breath=patientReady=false;score=null;xray='';miniGame=null;positionChoice='PA';patientOffset=2;collimationChoice='optimal';technique={kvp:110,ma:31.25,mas:2.5,sid:180,oid:8,time:.08,grid:false,aec:false};save();render();}

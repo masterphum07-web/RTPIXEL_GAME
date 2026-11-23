@@ -11,10 +11,12 @@ export class HospitalScene extends Phaser.Scene {
   private facing=0;
   private contacts:Contact[]=[];
   private interactLock=false;
+  private keyboardInteractHeld=false;
+  private virtualInteractHeld=false;
   private virtual:{up:boolean;down:boolean;left:boolean;right:boolean}={up:false,down:false,left:false,right:false};
-  private readonly handleKeyInteract=()=>{if(!this.interactLock){this.interactLock=true;this.tryInteract();}};
-  private readonly releaseKeyInteract=()=>{this.interactLock=false;};
-  private readonly handleVirtualInteract=()=>this.tryInteract();
+  private readonly handleKeyInteract=()=>{if(this.keyboardInteractHeld)return;this.keyboardInteractHeld=true;if(!this.interactLock&&this.tryInteract(true))this.interactLock=true;};
+  private readonly releaseKeyInteract=()=>{this.keyboardInteractHeld=false;if(!this.virtualInteractHeld)this.interactLock=false;};
+  private readonly handleVirtualInteract=(active:boolean)=>{if(active===this.virtualInteractHeld)return;this.virtualInteractHeld=active;if(active){if(!this.interactLock&&this.tryInteract(true))this.interactLock=true;}else if(!this.keyboardInteractHeld)this.interactLock=false;};
   private readonly handleQuestUpdated=()=>this.events.emit('quest-world-refresh');
   private readonly handleVirtualMove=(direction:keyof HospitalScene['virtual'],active:boolean)=>{this.virtual[direction]=active;};
   private readonly handlePointerDown=(pointer:Phaser.Input.Pointer)=>{
@@ -67,6 +69,9 @@ export class HospitalScene extends Phaser.Scene {
       this.game.events.off('quest-updated',this.handleQuestUpdated);
       this.game.events.off('virtual-move',this.handleVirtualMove);
       this.game.events.off('virtual-interact',this.handleVirtualInteract);
+      this.keyboardInteractHeld=false;
+      this.virtualInteractHeld=false;
+      this.interactLock=false;
     });
   }
 
@@ -74,6 +79,7 @@ export class HospitalScene extends Phaser.Scene {
 
   update(_time:number,delta:number){
     const body=this.player.body as Phaser.Physics.Arcade.Body;
+    if((this.keyboardInteractHeld||this.virtualInteractHeld)&&!this.interactLock&&this.tryInteract(false))this.interactLock=true;
     let dx=0,dy=0;
     if(this.keys.LEFT.isDown||this.keys.A.isDown||this.virtual.left)dx=-1;
     if(this.keys.RIGHT.isDown||this.keys.D.isDown||this.virtual.right)dx=1;
@@ -291,11 +297,14 @@ export class HospitalScene extends Phaser.Scene {
   private addBlocker(group:Phaser.Physics.Arcade.StaticGroup,x:number,y:number,w:number,h:number){
     const object=group.create(x,y,'hospital-people',0);object.setVisible(false);object.setSize(w,h);object.setOffset(-w/2,-h/2);object.refreshBody();
   }
-  private tryInteract(){
-    const candidate=[...this.contacts].sort((a,b)=>Phaser.Math.Distance.Between(this.player.x,this.player.y,a.x,a.y)-Phaser.Math.Distance.Between(this.player.x,this.player.y,b.x,b.y))[0];
-    const reach=candidate?.kind==='radiology-door'?72:36;
-    if(!candidate||Phaser.Math.Distance.Between(this.player.x,this.player.y,candidate.x,candidate.y)>reach){this.game.events.emit('world-dialogue','no-one');return;}
+  private tryInteract(showHint=true){
+    const candidate=this.contacts
+      .map(contact=>({contact,distance:Phaser.Math.Distance.Between(this.player.x,this.player.y,contact.x,contact.y)}))
+      .filter(({contact,distance})=>distance<=(contact.kind==='radiology-door'?72:36))
+      .sort((a,b)=>a.distance-b.distance)[0]?.contact;
+    if(!candidate){if(showHint)this.game.events.emit('world-dialogue','no-one');return false;}
     this.interact(candidate.kind);
+    return true;
   }
   private interact(kind:ContactKind){this.game.events.emit('world-dialogue',kind);}
 }
