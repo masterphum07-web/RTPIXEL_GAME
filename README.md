@@ -20,7 +20,7 @@ npm run build       # ตรวจ TypeScript และสร้าง productio
 npm run preview     # เปิดดู production build ในเครื่อง
 ```
 
-การตรวจล่าสุด: `npm run build` ผ่านด้วย TypeScript และ Vite; ทดสอบใน browser ด้วยการเดินคุย mentor → reception → radiology, เล่น checklist/positioning/collimation/timing จนได้ภาพและคะแนน, กลับแผนกคุย radiologist, เปิด skill tree และสลับฉากซ้ำโดย console ไม่มี error/warning หลังแก้ texture lifecycle ตรวจ viewport 390×844 แล้ว touch pad/dock ปรากฏตาม responsive rules. bundle มี Phaser รวมอยู่และ Vite แจ้งเตือนขนาด JS chunk มากกว่า 500 kB (ยังสร้างไฟล์ได้ตามปกติ)
+การตรวจล่าสุด: `npm run build` ผ่านด้วย TypeScript และ Vite; เล่น flow mentor → reception → radiology → ภาพ/คะแนน → radiologist จนครบ โดย quest HUD แสดงขั้นกลับไปสรุปก่อนและเปลี่ยนเป็นสำเร็จหลังคุยแพทย์, XP/เหรียญ/เคส/questStep ถูกเซฟ. Playwright ตรวจ viewport 1440×900 และ 390×844: ภาพ portrait โหลดครบ, ฉากบนมือถือรักษาสัดส่วนและซูมแบบ crop ด้านข้าง, ไม่มี console error หรือ request ล้มเหลว. bundle มี Phaser รวมอยู่และ Vite แจ้งเตือนขนาด JS chunk มากกว่า 500 kB (ยังสร้างไฟล์ได้ตามปกติ)
 
 ## วงจรเกมที่ทำงานได้
 
@@ -45,14 +45,16 @@ src/
   ui/         HUD, dialogs, quest, mission UI and responsive pixel-game styling
   main.ts     Phaser/Vite entry point
 public/
-  assets/     Original SVG portraits and PixelFX effect/license notices
+  assets/     Original pixel portraits, detailed hub art and PixelFX effect/license notices
   sw.js       Offline app-shell service worker (versioned during build)
 ```
 
 - `src/game/hospital-scene.ts`: tile-based courtyard, camera, Arcade collisions, NPCs, keyboard and touch interaction.
+- Character atlas uses 64×96 source frames scaled to the original 16×24 world footprint, with shaded hair/skin, distinct outfits, fine facial/uniform pixels and alternating walk frames. `hospital-world.png` is original 1024×576 pixel art (2× world size) rendered behind the collision map; 96×96 portraits are layered PNG art.
 - `src/game/room-scene.ts`: original pixel-art X-ray room scene.
 - `src/ui/app.ts`: quest state, dialogue, case mini-games, scoring and local saves.
 - `src/game/cases.ts` / `simulation.ts`: fictional case descriptions and deterministic game scoring/image generation.
+- `scripts/draw-pixel-portraits.py` and `scripts/draw-hospital-world.py`: reproducible artwork scripts for the Astra Pixel Art skill; editable exports/state are under `pixelart/exports/`.
 
 ## การบันทึก
 
@@ -83,6 +85,7 @@ npx --yes gh-pages@6.3.0 -d dist -b gh-pages
 |---|---|---|
 | `phaser-engineer` | `C:/Users/phumshop/.codex/skills/phaser-engineer` | ใช้ออกแบบ Phaser scenes, physics, input และ save schema |
 | `pixelfx` | [patch-gg/pixelfx](https://github.com/patch-gg/pixelfx), `skills/pixelfx` | ใช้เอฟเฟกต์ confetti ในเกม; MIT, ดู notices ใน repo |
+| `astra-pixel-art` | [Shanghaitech-DataTech/PixelSkill](https://github.com/Shanghaitech-DataTech/PixelSkill), `skills/astra-pixel-art` | ติดตั้งไว้ที่ `C:/Users/phumshop/.agents/skills/astra-pixel-art`; ใช้วาดภาพพอร์ตเทรต 96×96 แบบ layered PNG ด้วย Python มาตรฐาน (MIT) |
 | `spritecast` | [Sunghwan0112/spritecast](https://github.com/Sunghwan0112/spritecast), `skills/spritecast` | มีในเครื่อง/ตรวจวิธีใช้แล้ว; ยังไม่สร้าง asset เพราะ pipeline สร้างภาพใช้ API แบบคิดค่าใช้จ่ายและไม่ได้จำเป็นกับงานโค้ดพิกเซลชุดนี้ |
 | `img2threejs` | [img2threejs/img2threejs](https://github.com/img2threejs/img2threejs), repository root `SKILL.md` | มีในเครื่อง/ตรวจแล้ว; ไม่ใช้เพราะเกมนี้เป็น 2D pixel และไม่มีโมเดล 3D |
 | `jev-system-one` | local Codex skill `C:/Users/phumshop/.codex/skills/jev-system-one` | ใช้ JEV จริงตัดสินใจลำดับภารกิจ/การควบคุม ดูบันทึกด้านล่าง |
@@ -95,6 +98,7 @@ npx --yes gh-pages@6.3.0 -d dist -b gh-pages
 ```powershell
 $installer = "$env:USERPROFILE\.codex\skills\.system\skill-installer\scripts\install-skill-from-github.py"
 python $installer --repo patch-gg/pixelfx --path skills/pixelfx
+python $installer --repo Shanghaitech-DataTech/PixelSkill --path skills/astra-pixel-art --dest "$env:USERPROFILE/.agents/skills"
 python $installer --repo img2threejs/img2threejs --path . --name img2threejs
 python $installer --repo Sunghwan0112/spritecast --path skills/spritecast
 # Optional PS2-only toolset; not needed for this browser game:
@@ -107,10 +111,10 @@ python $installer --repo Jakeschincariol/console-skill --path console-anywhere c
 
 ### JEV record
 
-JEV System One ถูกเรียกผ่าน TypeSafe SDK จริงระหว่างการตัดสินใจออกแบบ รุ่น `jev-1.13.0`: เลือก flow `walk-quest-to-room` (confidence 1.00), เลือกลำดับทำเคสให้เสร็จก่อน (confidence 1.00), และเลือก hybrid d-pad + แตะจอสำหรับแท็บเล็ต (confidence 0.68; probabilities 0.79 / 0.02 / 0.19) usage ที่ SDK คืน: 866 input tokens, 169 output tokens ไม่มี request ID ในผลลัพธ์
+JEV System One ถูกเรียกผ่าน TypeSafe SDK จริง รุ่น `jev-1.13.0`. การออกแบบ gameplay เลือก flow `walk-quest-to-room` (confidence 1.00), ทำเคสแรกให้ครบก่อน (confidence 1.00), และ hybrid d-pad + แตะจอบนแท็บเล็ต (confidence 0.68; probabilities 0.79 / 0.02 / 0.19), usage 866 input / 169 output tokens. การจัดลำดับภาพรอบนี้เลือก `characters-first` (confidence 1.00; probabilities 1 / 0 / 0), usage 544 input / 45 output tokens. ไม่มี request ID ในผลลัพธ์ทั้งสองครั้ง
 
 JEV ใช้เป็นตัวช่วยตัดสินใจแบบ bounded choice เท่านั้น กฎเกม คะแนน การเซฟ และ input validation ยังคงเป็นโค้ด deterministic ห้ามใส่ JEV/API key ใน frontend, README, git หรือ log หาก AI คนต่อไปต้องเรียก JEV ให้ใช้ skill ในเครื่องและ secret ผ่าน environment ที่จัดการอย่างปลอดภัยเท่านั้น
 
 ## Credits
 
-PixelFX confetti effect distributed under MIT. รายละเอียด license/attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), `public/assets/pixelfx-LICENSE.txt`, `public/assets/pixelfx-NOTICE.md` ภาพ UI, ฉาก, ตัวละคร และ X-ray สังเคราะห์เป็นงานวาดด้วยโค้ด/SVG ของโปรเจกต์นี้ ไม่ได้ดึงภาพจาก reference มาใช้เป็น asset
+PixelFX confetti effect distributed under MIT. รายละเอียด license/attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), `public/assets/pixelfx-LICENSE.txt`, `public/assets/pixelfx-NOTICE.md`. ภาพพอร์ตเทรต 96×96 เป็น PNG แบบ layered วาดด้วย Astra Pixel Art; สคริปต์วาดอยู่ใน `scripts/draw-pixel-portraits.py` และไฟล์แก้ไข/preview อยู่ใต้ `pixelart/exports/`. ฉากและตัวละครในเกมวาดด้วยโค้ด/SVG ของโปรเจกต์ ไม่ได้ดึงภาพจาก reference มาใช้เป็น asset.

@@ -9,11 +9,11 @@
 
 ## Current implementation
 
-- `hospital` scene: 16 px procedural tilemap, follow camera, Arcade physics/collisions, characters/NPC contacts, WASD/arrows, E interaction, virtual d-pad and touch interact.
+- `hospital` scene: 16 px collision tilemap under a custom 2× pixel-art hospital/grounds background, follow camera, Arcade physics/collisions, characters/NPC contacts, WASD/arrows, E interaction, virtual d-pad and touch interact.
 - Quest sequence: mentor → reception/referral → radiology door → Chest PA practice → radiologist debrief.
 - `room` scene: side-view X-ray setup with verify, positioning, collimation, exposure timing, fictional technique controls, synthetic image, deterministic feedback, XP/coins and PixelFX completion effect.
 - More cases, learning/reference panel, skill progression, quiz, results view, localStorage schema 3, responsive UI, PWA manifest/service worker and GitHub Pages publishing setup are included.
-- Original artwork is mostly drawn in code and SVG. Do not replace the top-down RPG with a dashboard or a 3D scene.
+- Original artwork is drawn in code and SVG, with new 96×96 pixel portraits and a 1024×576 (2× world-size) hub background generated as layered PNGs using Astra Pixel Art. Keep the 64×96 character source atlas scaled to the same 16×24 world footprint. Do not replace the top-down RPG with a dashboard or a 3D scene.
 
 ## Engineering rules
 
@@ -53,6 +53,7 @@ When asked to verify a change, inspect the game in a real browser and check the 
 Check local availability first. Codex skill folders are not project libraries; do not copy the global skills directory into this repository.
 
 - **Use:** `phaser-engineer`, `playwright`, `jev-system-one` for Phaser implementation, browser verification, and bounded decisions. `pixelfx` is in use for the completion effect.
+- **Use for pixel assets:** `astra-pixel-art` is installed at `C:/Users/phumshop/.agents/skills/astra-pixel-art` from `Shanghaitech-DataTech/PixelSkill` (MIT). It draws layered, grid-aligned PNGs with standard Python; source drawing is `scripts/draw-pixel-portraits.py` and exports are in `pixelart/exports/`.
 - **Optional:** `spritecast` for new 2D characters/props when its requirements are met. Its drawing/model pipeline may incur cost and needs the applicable keys; inspect its `SKILL.md` and get explicit approval before a paid step. `img2threejs` is for genuinely 3D assets and is normally irrelevant to the 2D target.
 - **Not for this project:** `Jakeschincariol/console-skill` contains PS2 reverse-engineering, porting, modding, and asset tools.
 - **Live JEV used in this project:** details and exact usage returned by the SDK are in `README.md`. Do not claim a fresh live JEV call unless you actually made one and inspected the usage metadata. Never expose or commit the key.
