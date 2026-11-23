@@ -47,7 +47,6 @@ src/
 public/
   assets/     Original SVG portraits and PixelFX effect/license notices
   sw.js       Offline app-shell service worker (versioned during build)
-.github/workflows/deploy.yml  Build and publish GitHub Pages
 ```
 
 - `src/game/hospital-scene.ts`: tile-based courtyard, camera, Arcade collisions, NPCs, keyboard and touch interaction.
@@ -61,7 +60,16 @@ public/
 
 ## GitHub Pages
 
-มี workflow ที่ `.github/workflows/deploy.yml` เมื่อ push branch `main` แล้ว workflow จะ build ด้วย repository base path และ deploy โฟลเดอร์ `dist/` ไป GitHub Pages ตั้งค่า Pages source เป็น **GitHub Actions** ในหน้า Settings → Pages ของ repository หาก workflow แรกไม่เริ่ม ให้ตรวจ Actions permissions ของ repository
+หน้า GitHub Pages ใช้ branch `gh-pages` ที่ root ซึ่งเก็บไฟล์ production จาก `dist/` ส่วน source code อยู่ branch `main` การ publish รอบแรกทำจากเครื่องที่มีสิทธิ์เขียน repo:
+
+```powershell
+$env:GITHUB_ACTIONS = 'true'
+$env:GITHUB_REPOSITORY = 'masterphum07-web/RTPIXEL_GAME'
+npm run build
+npx --yes gh-pages@6.3.0 -d dist -b gh-pages
+```
+
+การ push ไป `gh-pages` จะอัปเดตหน้าเว็บโดย GitHub Pages อัตโนมัติ หากตั้งค่า Pages ไว้ครั้งแรก ให้เลือก **Deploy from a branch → gh-pages → /(root)** ใน Settings → Pages ผู้รับช่วงต้อง build/publish อีกครั้งหลังแก้โค้ดบน `main` โปรเจกต์ไม่ต้องใช้ secret สำหรับ build หรือ publish
 
 ไม่มี token, API key หรือ secret ใดต้องเพิ่มเพื่อ build/deploy เกมนี้
 

@@ -12,7 +12,7 @@
 - `hospital` scene: 16 px procedural tilemap, follow camera, Arcade physics/collisions, characters/NPC contacts, WASD/arrows, E interaction, virtual d-pad and touch interact.
 - Quest sequence: mentor → reception/referral → radiology door → Chest PA practice → radiologist debrief.
 - `room` scene: side-view X-ray setup with verify, positioning, collimation, exposure timing, fictional technique controls, synthetic image, deterministic feedback, XP/coins and PixelFX completion effect.
-- More cases, learning/reference panel, quiz, results view, localStorage schema 3, responsive UI, PWA manifest/service worker and GitHub Pages workflow are included.
+- More cases, learning/reference panel, skill progression, quiz, results view, localStorage schema 3, responsive UI, PWA manifest/service worker and GitHub Pages publishing setup are included.
 - Original artwork is mostly drawn in code and SVG. Do not replace the top-down RPG with a dashboard or a 3D scene.
 
 ## Engineering rules
@@ -61,4 +61,4 @@ The global skill sources, install paths, provenance, and exclusions are document
 
 ## Publishing
 
-GitHub Pages is configured by `.github/workflows/deploy.yml` and deploys `dist/` from `main`. Never point this project at the old project's remote. Verify the intended repository before push and do not add API keys to GitHub Actions; this game has no secret requirement.
+GitHub Pages is served from the `gh-pages` branch root. To refresh it, use the build/publish commands in `README.md`. Never point this project at the old project's remote. Verify the intended repository before push and do not add API keys; this game has no secret requirement.
