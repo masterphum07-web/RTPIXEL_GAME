@@ -2,6 +2,12 @@
 
 Audit reference: local `main` checkout; the preceding art checkpoint was commit `4a39eb4`. Repository: `masterphum07-web/RTPIXEL_GAME`. The current sprite/effect update is built and browser-tested; source push and Pages deployment are reported separately.
 
+## Interaction button fix — 2026-11-24
+
+- Root cause: the contextual `E` button was inside `.touch-pad`, which was `display:none` except on coarse-pointer devices. On desktop, the canvas showed only a keyboard hint and there was no clickable control. Legacy small-screen CSS also positioned that button below the viewport, and a 560 px minimum shell could clip controls in short landscape windows.
+- Fix: show a large contextual action button on all pointer types. It uses the same `virtual-interact` controller as keyboard E and shows the current action (talk, enter, shop, etc.). Removed the stale mobile layout rules and made the shell fit the actual viewport height.
+- Verification: production `npm run build` passed. Playwright confirmed the button is visible and clickable at 1440×900, iPad 1024×768, phone 390×844, phone landscape 844×390, and narrow mouse 390×844. A full mouse and iPad flow clicked the mentor, Reception, and Radiology entrance and reached the Chest PA mission without console or page errors. Full quest/X-ray/shop/dungeon regression passed.
+
 ## Latest art checkpoint — 2026-11-24
 
 - Replaced the code-painted hospital sprite atlas with an original Astra-authored 96-frame sheet (six roles, four facings, four walk frames), while preserving its displayed footprint and scaled collision body.

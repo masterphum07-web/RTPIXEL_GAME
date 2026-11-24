@@ -9,7 +9,7 @@
 
 ## Current implementation
 
-- `hospital` scene: 16 px collision tilemap under a custom 2× pixel-art hospital/grounds background, full 512×288 viewport, Arcade physics/collisions, characters/NPC contacts, WASD/arrows, E interaction, analog virtual joystick and fixed touch-interact button.
+- `hospital` scene: 16 px collision tilemap under a custom 2× pixel-art hospital/grounds background, full 512×288 viewport, Arcade physics/collisions, characters/NPC contacts, WASD/arrows, E interaction, analog virtual joystick, and an always-visible contextual on-screen interact/enter button for mouse and touch.
 - Quest sequence: mentor → reception/referral → radiology door → Chest PA practice → radiologist debrief.
 - `room` scene: side-view X-ray setup with verify, positioning, collimation, exposure timing, fictional technique controls, synthetic image, deterministic feedback, XP/coins and PixelFX completion effect.
 - More cases, learning/reference panel, 20-skill progression, quest board/shop/crafting/collection, story journal, Noise Laboratory, localStorage schema 5 with zone-specific positions, responsive UI, PWA manifest/service worker and GitHub Pages publishing setup are included.

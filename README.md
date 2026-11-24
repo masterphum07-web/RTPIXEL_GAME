@@ -21,7 +21,7 @@
 | 7 · Story expansion | ระบบ chapter/relationship และบท 1–2 ต่อกับเควสต์/ดันเจียน; บท 3–5 และโซนต่อไปมี outline และเงื่อนไขล็อกไว้ |
 | 8 · Multiplayer preparation | เพิ่ม typed contracts สำหรับ presence/party/co-op/leaderboard/transport; ยังไม่มีบัญชี, server หรือ online play |
 
-งานต้นทางอยู่บน branch `main` ของ `masterphum07-web/RTPIXEL_GAME`; การอัปเดต branch ต้นทางไม่ใช่การ publish ไป GitHub Pages โดยอัตโนมัติ และรอบนี้ยังไม่ได้ deploy. Save ยังอยู่ใน localStorage ของ browser และไม่ได้ sync ข้ามอุปกรณ์.
+งานต้นทางอยู่บน branch `main` ของ `masterphum07-web/RTPIXEL_GAME`; การอัปเดต branch ต้นทางไม่ใช่การ publish ไป GitHub Pages โดยอัตโนมัติ หน้าเกมเผยแพร่แยกที่ branch `gh-pages`. Save ยังอยู่ใน localStorage ของ browser และไม่ได้ sync ข้ามอุปกรณ์.
 
 ## เริ่มเล่น
 
@@ -32,14 +32,14 @@ npm ci
 npm run dev
 ```
 
-เปิด URL ที่ Vite แสดงในเทอร์มินัล เล่นด้วย **WASD / ปุ่มลูกศร** เพื่อเดิน และ **E** เพื่อคุยหรือโต้ตอบ บน iPad/จอสัมผัสใช้ **จอยสติ๊ก analog 360°** ทางซ้ายและปุ่ม **E** ทางขวา; แตะค้างแล้วลากเพื่อเดิน ปล่อยเพื่อหยุด
+เปิด URL ที่ Vite แสดงในเทอร์มินัล เล่นด้วย **WASD / ปุ่มลูกศร** เพื่อเดิน หรือใช้ปุ่ม **E** บนจอที่มุมขวาล่างเพื่อคุย/เข้าแผนกได้ทุกอุปกรณ์ บน iPad/จอสัมผัสยังมี **จอยสติ๊ก analog 360°** ทางซ้าย; ปุ่ม E จะแสดงคำใบ้ เช่น “คุย” หรือ “เข้า” ตามเป้าหมายใกล้ตัว
 
 ```bash
 npm run build       # ตรวจ TypeScript และสร้าง production bundle ที่ dist/
 npm run preview     # เปิดดู production build ในเครื่อง
 ```
 
-การตรวจรอบนี้: `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright ผ่าน full gameplay regression รวม X-ray, rewards, chapter, shop และ dungeon; เก็บภาพใหม่ที่ 1440×900 และ 1024×768 แล้วตรวจว่าไม่มี browser error ระหว่างเข้า mission. ก่อนหน้านี้มีการทดสอบ responsive ที่ 1920×1080, iPad จำลอง 1024×768 / 1180×820 / 1366×1024 และมือถือ 390×844; browser emulation ไม่ใช่เครื่อง iPad จริง. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
+การตรวจรอบนี้: `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright ผ่าน full gameplay regression และกดปุ่ม E บนจอเพื่อไปจาก lobby ผ่าน Reception เข้าห้อง X-ray บน desktop และ iPad emulation. ปุ่มมองเห็นและกดได้ที่ 1440×900, 1024×768, 390×844, แนวนอน 844×390 และจอ 390×844 แบบเมาส์; ไม่พบ browser error. การทดสอบเป็น browser emulation ไม่ใช่เครื่อง iPad จริง. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
 
 ## งานภาพและแหล่ง asset
 
