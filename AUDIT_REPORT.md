@@ -1,5 +1,25 @@
 # RADTECH PIXEL — Source Audit and Current Checkpoint
 
+## Phase 0–1 re-audit — 2026-11-25
+
+- Scope: existing source checkout on `codex/radtech-phase0-1`; no production branch, remote, or player save was changed.
+- `npm ci` initially hit Windows `EPERM` because a headed-browser Vite process held a native dependency. The browser was closed, clean install then completed (20 packages; 0 reported vulnerabilities), and baseline `npm run build` passed with Vite's existing large-chunk notice.
+- Fresh desktop Chromium audit reproduced a contextual action mismatch: the scene selected the nearby `radiology-door` while the newly rendered touch button still advertised the quest-step Reception action. Cause confirmed in code: its initial label came from quest state, while `mountApp` cached the last target kind across complete DOM re-renders and skipped updating a replacement button.
+- The source fix makes the action label a neutral fallback and refreshes it when either the selected target or actual button element changes. The same pass replaces the dashboard's hard-coded level/HP values with saved profile values.
+- A seeded Noise Lab browser check exposed a second runtime crash: `DungeonScene` synchronously requested saved coordinates before creating `this.player`, so a save returning to that zone called `setPosition` on `undefined`. The request now runs immediately after the player sprite is created. The seeded-zone recheck passed after the fix.
+- Visual audit at a 512×288 game viewport scaled to 1036×583 CSS px found the hub composition substantially flatter and sparser than the supplied target. This checkpoint does not claim that the art overhaul is complete.
+- PixelFX candidate review selected `impacts/hit-spark` for brief correct-answer combat feedback. It was recolored to the hospital cyan/blue ramp, rendered as a 16-frame 136×80 Phaser atlas at 30 fps, and checked with `node tools/check.mjs impacts/hit-spark` (1 pass, 0 fail, 0 warnings). The cue is scheduled after the result dialog closes so the dialog does not cover it.
+- Live JEV was called through the installed TypeSafe SDK. It favored completing a playable vertical slice (confidence 0.98); for the next PixelFX use it favored combat feedback, but with low confidence 0.37. This is a bounded recommendation only. Exact record: `JEV_DECISION_LOG.md`.
+- Fresh headed desktop Chromium verification confirms the selected target and contextual button stay in sync after the mentor dialogue causes a DOM rebuild. The Reception action opens Reception dialogue; at the locked X-ray entrance the label explicitly says it is locked and points back to the referral objective. The seeded Noise Lab save now boots without a crash, opens an encounter, applies the correct-answer HP change, and plays then destroys one `combat-hit-spark` sprite after Continue. These focused tests reported 0 console errors and 0 warnings. Mobile/iPad, full X-ray, shop and save/reload regression remain outside completed coverage.
+
+### Phase 0–1 verification (2026-11-25)
+
+- `npm ci`: passed after browser/dev server stopped.
+- Baseline `npm run build`: passed before edits.
+- Post-change `npm run build`: passed. The baseline build reported a non-blocking large-chunk notice; later build output passed without that notice.
+- Post-change browser coverage: focused fresh-profile desktop test passed the mentor-to-Reception action and target-aware locked-door label at the authored 512×288 world. A seeded Noise Lab save booted successfully; normal E interaction opened the first encounter, the correct answer changed enemy HP from 2/2 to 1/2, and Continue spawned a hit-spark that self-destroyed. Console had 0 errors and 0 warnings. No mobile/iPad emulation or full game loop was run in this re-audit.
+- PixelFX check: `node tools/check.mjs impacts/hit-spark` passed (1 pass, 0 fail, 0 warnings); runtime trigger was confirmed in the headed browser.
+
 Audit reference: local `main` checkout; the preceding art checkpoint was commit `4a39eb4`. Repository: `masterphum07-web/RTPIXEL_GAME`. The current sprite/effect update is built and browser-tested; source push and Pages deployment are reported separately.
 
 ## Interaction button fix — 2026-11-24

@@ -1,5 +1,14 @@
 # RADTECH PIXEL — แผนพัฒนาสู่เกม RPG ออนไลน์
 
+## Checkpoint 2026-11-25 · Phase 0–1
+
+- ทำงานใน branch `codex/radtech-phase0-1`; ไม่แก้ `gh-pages`, ไม่ push และไม่ deploy.
+- Re-audit พบปุ่ม E แสดงคำสั่งจาก quest step เก่าหลัง DOM rerender แม้ Phaser เปลี่ยนเป้าหมายแล้ว. แก้ cache ให้ผูกกับ element ปุ่มจริง และแสดงข้อความประตูล็อก/ปลดล็อกตาม quest step.
+- เมนู training log แสดง level, HP และ currency จากโปรไฟล์ แทนตัวเลข level/HP ที่เคย hardcode.
+- เพิ่ม PixelFX `impacts/hit-spark` โทน cyan/blue เป็นเอฟเฟกต์ตอบถูกใน Noise Lab โดยรอจนปิดผลลัพธ์ก่อนเล่น. PixelFX checker, build และ runtime browser test ผ่าน; ทดสอบ correct answer แล้ว HP ศัตรูลดจริง จากนั้นเอฟเฟกต์เกิดและถูกลบหลังเล่นจบ.
+- Browser check แบบ headed Chromium ผ่านปุ่ม E / Reception / ประตูล็อก และการเปิด dungeon จาก save ที่อยู่ Noise Lab; 0 console errors และ 0 warnings. ยังไม่ได้ทดสอบ iPad/mobile, full X-ray, ร้าน หรือ save/reload regression ในรอบนี้.
+- งานภาพ hub ยังต้องเพิ่มความหนาแน่น/มิติให้ใกล้ reference; screenshot audit ปัจจุบันยังเห็นพื้นกว้างและรายละเอียดฉากไม่ถึงเป้าหมาย.
+
 เอกสารนี้เป็นแผนพัฒนาต่อยอดจากเกมต้นแบบปัจจุบัน ใช้โครงสร้างความคืบหน้าจาก MMORPG เช่น Ragnarok Online เป็นแรงบันดาลใจด้านเมือง เควสต์ ร้านค้า ปาร์ตี้ และกิจกรรมร่วมกัน โดยคงโลก ตัวละคร งานภาพ และเนื้อเรื่องเป็นต้นฉบับของ RADTECH PIXEL
 
 ## สถานะวันนี้
