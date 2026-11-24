@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 type ContactKind='mentor'|'reception'|'radiologist'|'radiology-door'|'engineer'|'librarian'|'student'|'quest-board'|'hidden-cache'|'lab-gate';
 interface Contact { x:number; y:number; kind:ContactKind; sprite?:Phaser.Physics.Arcade.Sprite; }
 const TILE=16, MAP_W=32, MAP_H=18;
+const TREE_ROOTS:[number,number][]=[[90,207],[151,210],[361,210],[423,207],[69,270],[466,270]];
 
 /** Top-down, tile-based hospital courtyard. The world is authored at native pixel scale. */
 export class HospitalScene extends Phaser.Scene {
@@ -53,6 +54,7 @@ export class HospitalScene extends Phaser.Scene {
     this.addBlocker(props,210,152,30,9); // waiting seats
     this.addBlocker(props,373,153,32,12); // bench
     this.addBlocker(props,88,160,22,27); // bus shelter
+    for(const [x,y] of TREE_ROOTS)this.addBlocker(props,x,y-8,13,7); // tree trunks
     this.physics.add.collider(this.player,props);
 
     this.contacts=[{x:306,y:156,kind:'mentor'},{x:185,y:172,kind:'reception'},{x:344,y:172,kind:'radiologist'},{x:256,y:126,kind:'radiology-door'},{x:116,y:172,kind:'librarian'},{x:394,y:172,kind:'engineer'},{x:370,y:215,kind:'student'},{x:78,y:210,kind:'quest-board'},{x:451,y:232,kind:'hidden-cache'},{x:468,y:120,kind:'lab-gate'}];
@@ -101,7 +103,7 @@ export class HospitalScene extends Phaser.Scene {
   }
 
   private addHospitalProp(frame:string,x:number,y:number){
-    return this.add.image(x,y,'hospital-props',frame).setOrigin(.5,1).setScale(.5).setDepth(5);
+    return this.add.image(x,y,'hospital-props',frame).setOrigin(.5,1).setScale(frame==='tree'?.62:.5).setDepth(y);
   }
 
   update(_time:number,delta:number){
@@ -122,6 +124,7 @@ export class HospitalScene extends Phaser.Scene {
     if(_time-this.positionSaveClock>2000&&(Math.abs(this.player.x-this.lastSavedX)>3||Math.abs(this.player.y-this.lastSavedY)>3)){this.positionSaveClock=_time;this.lastSavedX=this.player.x;this.lastSavedY=this.player.y;this.game.events.emit('world-position',{zone:'academy',x:Math.round(this.player.x),y:Math.round(this.player.y)});}
     if(!moving&&delta>0){body.setVelocity(0,0);}
     const target=this.findInteractionTarget();
+    this.player.setDepth(this.player.y+10);
     this.interactionPrompt.setVisible(Boolean(target));
     if(target){this.interactionPrompt.setPosition(target.sprite?.x??target.x,(target.sprite?.y??target.y)-18);this.interactionPrompt.setText(`${target.kind==='radiology-door'?'E · ENTER':'E · TALK'}`);}
     this.game.events.emit('interaction-target',target?.kind??null);
@@ -191,7 +194,7 @@ export class HospitalScene extends Phaser.Scene {
     const rect=(x:number,y:number,w:number,h:number,color:number)=>{d.fillStyle(color,1);d.fillRect(x,y,w,h);};
     // The exact 32×18 tile world remains fully visible at the configured camera size.
     // Original, transparent Astra Pixel Art cutouts provide foreground depth.
-    for(const [x,y] of [[88,188],[112,190],[402,191],[430,189],[92,255],[410,254]])this.addHospitalProp('tree',x+9,y+31);
+    for(const [x,y] of TREE_ROOTS)this.addHospitalProp('tree',x,y);
     this.addHospitalProp('fountain',256,229);this.addHospitalProp('ambulance',26,116);
     this.addHospitalProp('streetlamp',124,191);this.addHospitalProp('streetlamp',365,191);
     this.addHospitalProp('bench',396,160);this.addHospitalProp('wayfinding',124,170);
