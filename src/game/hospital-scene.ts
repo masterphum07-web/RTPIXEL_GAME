@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-type ContactKind='mentor'|'reception'|'radiologist'|'radiology-door';
+type ContactKind='mentor'|'reception'|'radiologist'|'radiology-door'|'engineer'|'librarian'|'student'|'quest-board'|'hidden-cache'|'lab-gate';
 interface Contact { x:number; y:number; kind:ContactKind; }
 const TILE=16, MAP_W=32, MAP_H=18;
 
@@ -9,6 +9,10 @@ export class HospitalScene extends Phaser.Scene {
   private player!:Phaser.Physics.Arcade.Sprite;
   private keys!:Record<string,Phaser.Input.Keyboard.Key>;
   private facing=0;
+  private coatEquipped=false;
+  private positionSaveClock=0;
+  private lastSavedX=0;
+  private lastSavedY=0;
   private contacts:Contact[]=[];
   private interactLock=false;
   private keyboardInteractHeld=false;
@@ -19,6 +23,7 @@ export class HospitalScene extends Phaser.Scene {
   private readonly handleVirtualInteract=(active:boolean)=>{if(active===this.virtualInteractHeld)return;this.virtualInteractHeld=active;if(active){if(!this.interactLock&&this.tryInteract(true))this.interactLock=true;}else if(!this.keyboardInteractHeld)this.interactLock=false;};
   private readonly handleQuestUpdated=()=>this.events.emit('quest-world-refresh');
   private readonly handleVirtualMove=(direction:keyof HospitalScene['virtual'],active:boolean)=>{this.virtual[direction]=active;};
+  private readonly handleOutfit=(equipped:boolean)=>{this.coatEquipped=equipped;};
   private readonly handlePointerDown=(pointer:Phaser.Input.Pointer)=>{
     const world=this.cameras.main.getWorldPoint(pointer.x,pointer.y);
     if(Math.abs(world.x-256)<28&&Math.abs(world.y-126)<28)this.interact('radiology-door');
@@ -34,8 +39,10 @@ export class HospitalScene extends Phaser.Scene {
     this.physics.world.setBounds(0,0,MAP_W*TILE,MAP_H*TILE);
     this.add.image(0,0,'hospital-world').setOrigin(0).setScale(.5).setDepth(-10);
     this.createTiles(); this.createTileWorld(); this.createDecor(); this.createSpriteSheet();
+    this.game.events.on('player-outfit',this.handleOutfit);
+    this.game.events.emit('request-player-outfit',(equipped:boolean)=>{this.coatEquipped=equipped;});
 
-    this.player=this.physics.add.sprite(256,205,'hospital-people',16);
+    this.player=this.physics.add.sprite(256,205,'hospital-people',32);
     this.player.setScale(.25).setDepth(30).setCollideWorldBounds(true).setSize(40,44).setOffset(12,48);
     this.player.setData('walkFrame',0);
     const walls=this.mapLayer;
@@ -47,11 +54,13 @@ export class HospitalScene extends Phaser.Scene {
     this.addBlocker(props,88,160,22,27); // bus shelter
     this.physics.add.collider(this.player,props);
 
-    this.contacts=[{x:267,y:172,kind:'mentor'},{x:185,y:172,kind:'reception'},{x:344,y:172,kind:'radiologist'},{x:256,y:126,kind:'radiology-door'}];
+    this.contacts=[{x:306,y:156,kind:'mentor'},{x:185,y:172,kind:'reception'},{x:344,y:172,kind:'radiologist'},{x:256,y:126,kind:'radiology-door'},{x:116,y:172,kind:'librarian'},{x:394,y:172,kind:'engineer'},{x:370,y:215,kind:'student'},{x:78,y:210,kind:'quest-board'},{x:451,y:232,kind:'hidden-cache'},{x:468,y:120,kind:'lab-gate'}];
     const npcGroup=this.physics.add.group({allowGravity:false,immovable:true});
-    this.createNpc(npcGroup,267,172,0); this.createNpc(npcGroup,185,172,1); this.createNpc(npcGroup,344,172,5); this.createNpc(npcGroup,289,208,3);
+    this.createNpc(npcGroup,306,156,0); this.createNpc(npcGroup,185,172,1); this.createNpc(npcGroup,344,172,5); this.createNpc(npcGroup,289,208,3);
+    this.createNpc(npcGroup,116,172,4); this.createNpc(npcGroup,394,172,5); this.createNpc(npcGroup,370,215,2);
     this.physics.add.collider(this.player,npcGroup);
-    this.player.setPosition(256,155);
+    this.player.setPosition(265,155);
+    this.game.events.emit('request-world-position',(position:{x:number;y:number}|null)=>{if(position&&Number.isFinite(position.x)&&Number.isFinite(position.y))this.player.setPosition(Phaser.Math.Clamp(position.x,20,492),Phaser.Math.Clamp(position.y,20,268));});
     const keyboard=this.input.keyboard!;
     this.keys={W:keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),A:keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),S:keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),D:keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),UP:keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),DOWN:keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),LEFT:keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),RIGHT:keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),E:keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)};
     this.cameras.main.startFollow(this.player,true,.12,.12);
@@ -69,6 +78,7 @@ export class HospitalScene extends Phaser.Scene {
       this.game.events.off('quest-updated',this.handleQuestUpdated);
       this.game.events.off('virtual-move',this.handleVirtualMove);
       this.game.events.off('virtual-interact',this.handleVirtualInteract);
+      this.game.events.off('player-outfit',this.handleOutfit);
       this.keyboardInteractHeld=false;
       this.virtualInteractHeld=false;
       this.interactLock=false;
@@ -88,8 +98,10 @@ export class HospitalScene extends Phaser.Scene {
     if(dx&&dy){dx*=.707;dy*=.707;}
     body.setVelocity(dx*68,dy*68);
     const moving=Boolean(dx||dy);
-    if(moving){this.facing=Math.abs(dx)>Math.abs(dy)?(dx<0?2:3):(dy<0?1:0);const f=(Math.floor(_time/155)%2);this.player.setFrame(16+this.facing*2+f);}
-    else this.player.setFrame(16+this.facing*2);
+    const frameBase=(this.coatEquipped?5:2)*16;
+    if(moving){this.facing=Math.abs(dx)>Math.abs(dy)?(dx<0?2:3):(dy<0?1:0);const f=(Math.floor(_time/125)%4);this.player.setFrame(frameBase+this.facing*4+f);}
+    else this.player.setFrame(frameBase+this.facing*4);
+    if(_time-this.positionSaveClock>2000&&(Math.abs(this.player.x-this.lastSavedX)>3||Math.abs(this.player.y-this.lastSavedY)>3)){this.positionSaveClock=_time;this.lastSavedX=this.player.x;this.lastSavedY=this.player.y;this.game.events.emit('world-position',{zone:'academy',x:Math.round(this.player.x),y:Math.round(this.player.y)});}
     if(!moving&&delta>0){body.setVelocity(0,0);}
   }
 
@@ -177,6 +189,11 @@ export class HospitalScene extends Phaser.Scene {
     for(const x of [128,176,334,422]){rect(x,183,3,7,0x263d61);rect(x-1,181,5,3,0xf0c85d);}
     // Room marker over the radiology doors.
     rect(236,91,40,10,0x253a63);rect(237,92,38,7,0x1c75a6);rect(239,94,34,3,0xb5ecff);
+    // Quest board, library sign, shop sign, research gate and a discoverable garden cache.
+    rect(65,190,26,20,0x273a61);rect(68,192,20,14,0x765b48);rect(70,194,16,10,0xe0d5b7);rect(72,196,12,1,0x48699b);rect(72,199,10,1,0x6585ad);rect(72,202,12,1,0x48699b);
+    rect(103,151,26,5,0x1e406e);rect(105,152,22,2,0x73d6f5);rect(391,151,29,5,0x1e406e);rect(393,152,25,2,0xffd56e);
+    rect(452,107,28,22,0x183c5d);rect(455,110,22,16,0x164f71);rect(458,112,16,12,0x45c9db);rect(460,114,12,8,0x112b4c);
+    rect(439,224,23,13,0x544b50);rect(441,222,19,12,0x836b57);rect(444,224,13,7,0xd5bb79);
     this.createLittleWallMonitors(d);
     this.drawPixelSign(d,220,74,'RADIOLOGY');
   }
@@ -196,8 +213,10 @@ export class HospitalScene extends Phaser.Scene {
     if(this.textures.exists('hospital-people'))return;
     // Draw at 2× source detail, then scale to the same 16×24 world footprint.
     // The extra source pixels let faces and uniforms hold finer pixel clusters.
-    const sourceScale=2,frameWidth=32*sourceScale,frameHeight=48*sourceScale;
-    const tex=this.textures.createCanvas('hospital-people',frameWidth*48,frameHeight);if(!tex)return;
+    const sourceScale=2,frameWidth=32*sourceScale,frameHeight=48*sourceScale,frameCount=6*4*4;
+    // Pack 8 frames per row so the high-detail atlas stays below common mobile texture limits.
+    const columns=8,rows=Math.ceil(frameCount/columns);
+    const tex=this.textures.createCanvas('hospital-people',frameWidth*columns,frameHeight*rows);if(!tex)return;
     const c=tex.getContext();
     const palettes=[
       {hair:'#332633',hairHi:'#765052',skin:'#f1c2a4',skinShade:'#d8917e',top:'#f0f3f4',topShade:'#c8d7e6',pants:'#4c6595',trim:'#68c9ed',role:'mentor'},
@@ -208,10 +227,10 @@ export class HospitalScene extends Phaser.Scene {
       {hair:'#272631',hairHi:'#63545a',skin:'#eec09f',skinShade:'#d08a77',top:'#edf1f5',topShade:'#c3d0de',pants:'#394c6e',trim:'#4f9dc7',role:'doctor'},
     ];
     const draw=(frame:number,kind:number,dir:number,walk:number)=>{
-      const ox=frame*frameWidth,pal=palettes[kind];
-      const p=(x:number,y:number,w:number,h:number,col:string)=>{c.fillStyle=col;c.fillRect(ox+x*sourceScale,y*sourceScale,w*sourceScale,h*sourceScale);};
-      const fine=(x:number,y:number,col:string)=>{c.fillStyle=col;c.fillRect(ox+x,y,1,1);};
-      const sway=walk?1:0;
+      const ox=(frame%columns)*frameWidth,oy=Math.floor(frame/columns)*frameHeight,pal=palettes[kind];
+      const p=(x:number,y:number,w:number,h:number,col:string)=>{c.fillStyle=col;c.fillRect(ox+x*sourceScale,oy+y*sourceScale,w*sourceScale,h*sourceScale);};
+      const fine=(x:number,y:number,col:string)=>{c.fillStyle=col;c.fillRect(ox+x,oy+y,1,1);};
+      const sway=[0,1,0,-1][walk];
       // A compact cast shadow anchors the 48 px sprite to the courtyard floor.
       p(7,45,18,2,'#263c4d');p(10,45,12,1,'#40576a');
       // Back hair silhouette and layered highlights.
@@ -263,7 +282,7 @@ export class HospitalScene extends Phaser.Scene {
         if(kind===5||kind===1){p(11,14,3,1,'#313446');p(19,14,3,1,'#313446');p(11,14,3,3,'#435367');p(19,14,3,3,'#435367');p(14,15,5,1,'#435367');}
       }
       // Legs use separate light/shade pixels so the walk cycle reads at native scale.
-      const leftLeg=walk?1:0,rightLeg=walk?-1:0;
+      const leftLeg=walk===1?1:walk===3?-1:0,rightLeg=-leftLeg;
       p(10+leftLeg,38,5,5,pal.pants);p(17+rightLeg,38,5,5,pal.pants);p(10+leftLeg,38,2,4,'#6885b6');p(18+rightLeg,38,2,4,'#6885b6');
       p(8+leftLeg,43,7,3,'#26334f');p(17+rightLeg,43,7,3,'#26334f');p(7+leftLeg,44,8,2,'#f1eee8');p(17+rightLeg,44,8,2,'#f1eee8');
       // Small color accents distinguish a radiology team without text-sized details.
@@ -280,27 +299,29 @@ export class HospitalScene extends Phaser.Scene {
       if(kind===1||kind===4){fine(47,59,'#ffffff');fine(48,61,kind===1?'#5bbfe0':'#63d9bb');}
       if(kind===5){fine(22,29,'#ffffff');fine(42,29,'#ffffff');fine(23,31,'#4c87ac');fine(41,31,'#4c87ac');}
     };
-    // 4 facings × 2 walking frames for student, staff, patient, and visitors.
-    for(let kind=0;kind<6;kind++)for(let dir=0;dir<4;dir++)for(let walk=0;walk<2;walk++)draw(kind*8+dir*2+walk,kind,dir,walk);
-    for(let frame=0;frame<48;frame++)tex.add(String(frame),0,frame*frameWidth,0,frameWidth,frameHeight);
+    // 4 facings × 4 walking frames for a readable 16-bit walk cycle.
+    for(let kind=0;kind<6;kind++)for(let dir=0;dir<4;dir++)for(let walk=0;walk<4;walk++)draw(kind*16+dir*4+walk,kind,dir,walk);
+    for(let frame=0;frame<frameCount;frame++)tex.add(String(frame),0,(frame%columns)*frameWidth,Math.floor(frame/columns)*frameHeight,frameWidth,frameHeight);
     tex.refresh();
   }
 
   private createNpc(group:Phaser.Physics.Arcade.Group,x:number,y:number,kind:number){
-    const npc=group.create(x,y,'hospital-people',kind*8) as Phaser.Physics.Arcade.Sprite;npc.setScale(.25).setDepth(y+4).setImmovable(true);
+    const npc=group.create(x,y,'hospital-people',kind*16) as Phaser.Physics.Arcade.Sprite;npc.setScale(.25).setDepth(y+4).setImmovable(true);
     npc.setSize(40,44).setOffset(12,48);npc.setData('npc',true);
     const bob=this.tweens.add({targets:npc,y:y-1,duration:900+kind*80,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
-    let idleFrame=0;this.time.addEvent({delay:800+kind*150,loop:true,callback:()=>{if(npc.active){idleFrame=1-idleFrame;npc.setFrame(kind*8+idleFrame);}}});
+    let idleFrame=0;this.time.addEvent({delay:800+kind*150,loop:true,callback:()=>{if(npc.active){idleFrame=1-idleFrame;npc.setFrame(kind*16+idleFrame);}}});
     return {npc,bob};
   }
 
   private addBlocker(group:Phaser.Physics.Arcade.StaticGroup,x:number,y:number,w:number,h:number){
-    const object=group.create(x,y,'hospital-people',0);object.setVisible(false);object.setSize(w,h);object.setOffset(-w/2,-h/2);object.refreshBody();
+    const object=group.create(x,y,'hospital-people',0).setVisible(false);
+    const body=object.body as Phaser.Physics.Arcade.StaticBody;
+    body.setSize(w,h,true);
   }
   private tryInteract(showHint=true){
     const candidate=this.contacts
       .map(contact=>({contact,distance:Phaser.Math.Distance.Between(this.player.x,this.player.y,contact.x,contact.y)}))
-      .filter(({contact,distance})=>distance<=(contact.kind==='radiology-door'?72:36))
+      .filter(({contact,distance})=>distance<=(contact.kind==='radiology-door'?24:52))
       .sort((a,b)=>a.distance-b.distance)[0]?.contact;
     if(!candidate){if(showHint)this.game.events.emit('world-dialogue','no-one');return false;}
     this.interact(candidate.kind);

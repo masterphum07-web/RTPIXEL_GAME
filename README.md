@@ -6,6 +6,21 @@
 
 > สถานะ: playable single-player prototype มีโลกโรงพยาบาล ภารกิจแรก มินิเกมฝึก และระบบบันทึกในเครื่อง ยังไม่มี backend หรือ multiplayer
 
+## สถานะตาม Master Development Prompt
+
+| Phase | สถานะใน build นี้ |
+|---|---|
+| 1 · Visual upgrade | ทำแล้ว: tile world, courtyard props, original pixel backdrop, NPC/player atlas 4 ทิศ × 4 เฟรม และ X-ray room |
+| 2 · RPG systems | ทำแล้ว: XP/level/SP, 20-node skill tree, inventory, equipment, collection, shop, crafting, save migration and zone-specific player positions |
+| 3 · Quest system | ทำแล้วใน vertical slice: main, side, daily, hidden-cache quests, rewards, relationship counters และ story journal 5 บท |
+| 4 · Radiology gameplay | เล่นจบได้: Chest PA, patient verification, positioning/pose, collimation, timing, synthetic image review, quality feedback |
+| 5 · Combat | เล่นได้: Noise Slime, Motion Phantom, Noise King, HP, answer feedback, skill effects และ drops |
+| 6 · Dungeon | มี Noise Laboratory หนึ่งด่านที่เข้า/ออกและสู้ได้ครบ; ด่านอื่นยังเป็นแผน ไม่แสดงเป็น playable |
+| 7 · Story expansion | ระบบ chapter/relationship และบท 1–2 ต่อกับเควสต์/ดันเจียน; บท 3–5 และโซนต่อไปมี outline และเงื่อนไขล็อกไว้ |
+| 8 · Multiplayer preparation | เพิ่ม typed contracts สำหรับ presence/party/co-op/leaderboard/transport; ยังไม่มีบัญชี, server หรือ online play |
+
+งานนี้ยังอยู่ใน checkout เครื่องนี้และยังไม่ได้ upload/publish ไป GitHub. Save เป็นข้อมูล local ของ browser และไม่ได้ sync ข้ามอุปกรณ์.
+
 ## เริ่มเล่น
 
 ต้องมี Node.js 20.19+ หรือ 22.12+ และ npm
@@ -22,7 +37,7 @@ npm run build       # ตรวจ TypeScript และสร้าง productio
 npm run preview     # เปิดดู production build ในเครื่อง
 ```
 
-การตรวจล่าสุด: `npm run build` ผ่านด้วย TypeScript และ Vite; เล่น flow mentor → reception → radiology → ภาพ/คะแนน → radiologist จนครบ โดย quest HUD แสดงขั้นกลับไปสรุปก่อนและเปลี่ยนเป็นสำเร็จหลังคุยแพทย์, XP/เหรียญ/เคส/questStep ถูกเซฟ. Playwright ตรวจ viewport 1440×900 และ 390×844: ภาพ portrait โหลดครบ, ฉากบนมือถือรักษาสัดส่วนและซูมแบบ crop ด้านข้าง, ไม่มี console error หรือ request ล้มเหลว. bundle มี Phaser รวมอยู่และ Vite แจ้งเตือนขนาด JS chunk มากกว่า 500 kB (ยังสร้างไฟล์ได้ตามปกติ)
+การตรวจรอบนี้: `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright เล่น flow เควสต์, เคส X-ray, rewards, chapter completion, world map, Noise Lab encounter และซื้อ/สวม cosmetic ในร้านได้. Browser pass แยกเคลียร์ Noise Slime ทั้งสอง, Motion Phantom และ Noise King ได้รางวัลครั้งเดียวและขึ้น Chapter 3. ตรวจ browser console ที่ 1440×900 และ 390×844 ไม่มี error/request failed. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
 
 ## วงจรเกมที่ทำงานได้
 
@@ -44,6 +59,7 @@ npm run preview     # เปิดดู production build ในเครื่�
 ```text
 src/
   game/       Phaser scenes, cases, scoring and synthetic X-ray generation
+    network/  Typed future-server contracts; no multiplayer client/server
   ui/         HUD, dialogs, quest, mission UI and responsive pixel-game styling
   main.ts     Phaser/Vite entry point
 public/
@@ -56,11 +72,14 @@ public/
 - `src/game/room-scene.ts`: original pixel-art X-ray room scene.
 - `src/ui/app.ts`: quest state, dialogue, case mini-games, scoring and local saves.
 - `src/game/cases.ts` / `simulation.ts`: fictional case descriptions and deterministic game scoring/image generation.
+- `src/game/content.ts` / `progression.ts`: data catalog, 20 skills, quests, story chapters, item drops and schema-5 local save migration.
+- `src/game/dungeon-scene.ts`: single-player Lost Imaging Lab, authored movement/collision and knowledge encounters.
+- `src/game/network/contracts.ts`: type-only boundary for future presence/party/co-op/leaderboard transport; no real online connection.
 - `scripts/draw-pixel-portraits.py` and `scripts/draw-hospital-world.py`: reproducible artwork scripts for the Astra Pixel Art skill; editable exports/state are under `pixelart/exports/`.
 
 ## การบันทึก
 
-ใช้ `localStorage` key `radtech-pixel-profile` (schema 3) เก็บ XP, เหรียญ, เคสที่ผ่าน, คะแนนสูงสุด และความคืบหน้าเควสต์ อยู่ในเบราว์เซอร์ของผู้เล่นเท่านั้น ล้างได้จากเมนูบันทึกการฝึก ปุ่มเริ่มใหม่จะลบข้อมูลเกมใน browser origin ปัจจุบัน
+ใช้ `localStorage` key `radtech-pixel-profile` (schema 5) เก็บ XP, เหรียญ, เคสที่ผ่าน, คะแนน, inventory/equipment/skills, quests, chapter, relationships, dungeon progress, collections, current zone และตำแหน่งแยกตามโซน อยู่ในเบราว์เซอร์ของผู้เล่นเท่านั้น ล้างได้จากเมนูบันทึกการฝึก ปุ่มเริ่มใหม่จะลบข้อมูลเกมใน browser origin ปัจจุบัน
 
 ## GitHub Pages
 

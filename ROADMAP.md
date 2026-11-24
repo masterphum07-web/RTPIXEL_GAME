@@ -10,6 +10,15 @@
 - สถานะและผู้เล่นยังอยู่ในเครื่องเดียว ไม่มีบัญชี, เซิร์ฟเวอร์, ผู้เล่นออนไลน์, ร้านค้าจริง หรือการบันทึกข้ามอุปกรณ์
 - GitHub Pages ทำหน้าที่โฮสต์ไฟล์เว็บ static ได้ แต่ไม่ใช่เซิร์ฟเวอร์สำหรับโลก MMORPG
 
+## ผลงานใน checkout ปัจจุบัน (ยังไม่ publish)
+
+- Phase 1–5 มี vertical slice ที่เล่นได้: hub, 4-direction character frames, quest progression, RPG profile/items/skills/shop, animated patient pose, complete Chest PA simulation and knowledge combat.
+- Phase 6 มี Lost Imaging Lab หนึ่งด่านจริงพร้อม Noise Slime, Motion Phantom, Noise King, drops และรางวัลเคลียร์ด่าน; Positioning Maze และ Phantom Archive ยังไม่ได้ทำเป็น playable zone.
+- Phase 7 มี narrative catalog 5 บท, chapter progression, relationships, hidden cache และ collection; Chapters 3–5/Caves/City/Archive ยังเป็น outline/locked.
+- Phase 8 มี TypeScript contracts สำหรับ presence/party/co-op/leaderboard และ transport boundary เท่านั้น ไม่มี auth/server/WebSocket/multiplayer.
+- `npm run build` ผ่าน และ Playwright ผ่าน flow เควสต์→X-ray→รายงานผล→Noise Lab encounter→ร้านและสวม cosmetic; ไม่มี browser console error ใน flow ที่ตรวจ.
+- ยังไม่ push หรือ deploy ตามคำสั่งเจ้าของโปรเจกต์.
+
 ## หลักการออกแบบ
 
 1. ทำเกมเล่นคนเดียวให้จบและคุมได้แน่นก่อน แล้วค่อยเพิ่มการเชื่อมต่อออนไลน์

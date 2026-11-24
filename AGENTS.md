@@ -12,7 +12,7 @@
 - `hospital` scene: 16 px collision tilemap under a custom 2× pixel-art hospital/grounds background, follow camera, Arcade physics/collisions, characters/NPC contacts, WASD/arrows, E interaction, virtual d-pad and touch interact.
 - Quest sequence: mentor → reception/referral → radiology door → Chest PA practice → radiologist debrief.
 - `room` scene: side-view X-ray setup with verify, positioning, collimation, exposure timing, fictional technique controls, synthetic image, deterministic feedback, XP/coins and PixelFX completion effect.
-- More cases, learning/reference panel, skill progression, quiz, results view, localStorage schema 3, responsive UI, PWA manifest/service worker and GitHub Pages publishing setup are included.
+- More cases, learning/reference panel, 20-skill progression, quest board/shop/crafting/collection, story journal, Noise Laboratory, localStorage schema 5 with zone-specific positions, responsive UI, PWA manifest/service worker and GitHub Pages publishing setup are included.
 - Original artwork is drawn in code and SVG, with new 96×96 pixel portraits and a 1024×576 (2× world-size) hub background generated as layered PNGs using Astra Pixel Art. Keep the 64×96 character source atlas scaled to the same 16×24 world footprint. Do not replace the top-down RPG with a dashboard or a 3D scene.
 
 ## Engineering rules
@@ -47,6 +47,8 @@ When asked to verify a change, inspect the game in a real browser and check the 
 6. Returning to the hub and talking to the radiologist completes the first-day quest once.
 7. Re-entering scenes does not duplicate event listeners; E, WASD/arrows and touch controls work.
 8. Browser reload restores local progress; no API secrets or real patient data are stored.
+9. Shop purchases and equipment persist, crafting consumes exact ingredients, and a cleared dungeon does not grant its one-time story reward repeatedly.
+10. `src/game/network/contracts.ts` defines a future client boundary only; never present the game as online until a server is implemented and verified.
 
 ## Relevant skills for the next AI
 

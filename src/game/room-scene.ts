@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 
 /** A hand-drawn 320×180 pixel room. Phaser scales the canvas with nearest-neighbour. */
 export class RoomScene extends Phaser.Scene {
+  private patientArms:Phaser.GameObjects.Container[]=[];
+  private readonly handlePatientPose=(pose:'rest'|'clinical')=>this.setPatientPose(pose);
   private readonly handleMissionComplete=()=>{
     const burst=this.add.sprite(160,82,'pixel-confetti').setDepth(10).setScale(.65).play('pixel-confetti-burst');
     burst.once(Phaser.Animations.Events.ANIMATION_COMPLETE,()=>burst.destroy());
@@ -60,15 +62,24 @@ export class RoomScene extends Phaser.Scene {
     tech.fillStyle(0x2751a0,1);tech.fillRect(78,105,21,20);tech.fillRect(75,107,5,15);tech.fillRect(97,108,5,12);tech.fillStyle(0x3b70c4,1);tech.fillRect(81,106,3,17);tech.fillStyle(0x6cceff,1);tech.fillRect(91,108,2,3);tech.fillStyle(0xe5e9fa,1);tech.fillRect(96,116,6,2);
     tech.fillStyle(0x15234c,1);tech.fillRect(80,124,8,13);tech.fillRect(91,124,8,13);tech.fillStyle(0x334e87,1);tech.fillRect(81,126,5,8);tech.fillRect(93,126,5,8);tech.fillStyle(0xe2e7f5,1);tech.fillRect(78,137,11,3);tech.fillRect(90,137,11,3);tech.fillStyle(0x273b67,1);tech.fillRect(78,140,12,1);tech.fillRect(90,140,12,1);
     // Patient on receptor, wearing a patterned gown. Anatomy remains stylized.
-    const patient=this.add.graphics();
-    patient.fillStyle(0x293866,1);patient.fillRect(174,73,18,3);patient.fillRect(172,76,22,3);patient.fillStyle(0x3a2938,1);patient.fillRect(174,70,19,5);patient.fillRect(172,73,4,4);patient.fillRect(188,72,5,3);
-    patient.fillStyle(0xf0c1a5,1);patient.fillRect(177,74,14,13);patient.fillStyle(0xffd3b2,1);patient.fillRect(179,75,10,10);patient.fillStyle(0x20283e,1);patient.fillRect(180,79,2,2);patient.fillRect(187,79,2,2);patient.fillStyle(0xd9857e,1);patient.fillRect(183,84,3,1);
-    patient.fillStyle(0xdceafb,1);patient.fillRect(174,87,20,27);patient.fillRect(176,114,7,2);patient.fillRect(186,114,7,2);patient.fillStyle(0x90aed9,1);patient.fillRect(176,90,16,22);
-    for(let i=0;i<10;i++){patient.fillStyle(i%2?0x7f9bd0:0xb7c7e6,1);patient.fillRect(177+(i*7)%14,90+(i*11)%20,1,1);}
-    patient.fillStyle(0xf4eee5,1);patient.fillRect(175,116,8,2);patient.fillRect(186,116,8,2);
+    const patient=this.add.container(0,0).setDepth(4),torso=this.add.graphics();
+    torso.fillStyle(0x293866,1);torso.fillRect(174,73,18,3);torso.fillRect(172,76,22,3);torso.fillStyle(0x3a2938,1);torso.fillRect(174,70,19,5);torso.fillRect(172,73,4,4);torso.fillRect(188,72,5,3);
+    torso.fillStyle(0xf0c1a5,1);torso.fillRect(177,74,14,13);torso.fillStyle(0xffd3b2,1);torso.fillRect(179,75,10,10);torso.fillStyle(0x20283e,1);torso.fillRect(180,79,2,2);torso.fillRect(187,79,2,2);torso.fillStyle(0xd9857e,1);torso.fillRect(183,84,3,1);
+    torso.fillStyle(0xdceafb,1);torso.fillRect(174,87,20,27);torso.fillRect(176,114,7,2);torso.fillRect(186,114,7,2);torso.fillStyle(0x90aed9,1);torso.fillRect(176,90,16,22);
+    for(let i=0;i<10;i++){torso.fillStyle(i%2?0x7f9bd0:0xb7c7e6,1);torso.fillRect(177+(i*7)%14,90+(i*11)%20,1,1);}
+    torso.fillStyle(0xf4eee5,1);torso.fillRect(175,116,8,2);torso.fillRect(186,116,8,2);patient.add(torso);
+    this.patientArms=[{x:175,y:89,sign:1},{x:193,y:89,sign:-1}].map(({x,y})=>{const limb=this.add.container(x,y),g=this.add.graphics();g.fillStyle(0x495f87,1).fillRect(-3,0,6,9);g.fillStyle(0xe5c5b8,1).fillRect(-3,8,6,8);g.fillStyle(0xf3d3c3,1).fillRect(-2,9,4,5);limb.add(g);patient.add(limb);return limb;});
+    for(const [x,angle] of [[179,-.04],[190,.04]] as const){const leg=this.add.container(x,112),g=this.add.graphics();g.fillStyle(0x5e7090,1).fillRect(-2,0,5,8);g.fillStyle(0xf4eee5,1).fillRect(-3,7,8,3);leg.add(g);patient.add(leg);this.tweens.add({targets:leg,angle:{from:angle,to:-angle},duration:720,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});}
     this.tweens.add({targets:patient,y:{from:0,to:-1},duration:900,yoyo:true,repeat:-1,ease:'Stepped',easeParams:[2]});
+    this.game.events.on('patient-pose',this.handlePatientPose);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>this.game.events.off('patient-pose',this.handlePatientPose));
     if(!this.anims.exists('pixel-confetti-burst')) this.anims.create({key:'pixel-confetti-burst',frames:this.anims.generateFrameNumbers('pixel-confetti',{start:0,end:102}),frameRate:24,repeat:0});
     this.game.events.on('mission-complete',this.handleMissionComplete);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>this.game.events.off('mission-complete',this.handleMissionComplete));
+  }
+
+  private setPatientPose(pose:'rest'|'clinical'){
+    const target=pose==='clinical' ? 0.72 : 0;
+    this.patientArms.forEach((arm,index)=>this.tweens.add({targets:arm,angle:(index===0?target:-target),duration:240,ease:'Sine.easeInOut'}));
   }
 }
