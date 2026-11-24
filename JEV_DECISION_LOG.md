@@ -9,3 +9,11 @@
 - **Usage metadata:** `748` input tokens, `92` output tokens. The response contained no request ID; none is recorded here.
 - **Application:** preserve the single-player quest-to-simulation loop, fix the reproducible interaction mismatch first, then add one short PixelFX hit cue to correct-answer feedback. Because the effect decision confidence was low, the effect is limited to a reversible one-shot and does not alter gameplay or clinical scoring.
 - JEV is advice only. Deterministic game state, rewards, save data, and educational/clinical truth remain owned by code and reviewed content.
+
+## 2026-11-25 · Character prototype size and outfit mapping
+
+- **Use:** live TypeSafe JavaScript SDK `@typesafe-ai/sdk@0.7.0`, model `jev-1.14.0`; bounded Stage A art decision after inspecting the existing 32×48 logical atlas and Phaser footprint.
+- **Decision A — candidate frame size:** `48x72`, confidence `0.26`; returned probabilities: 32×48 `0.12`, 40×64 `0.37`, 48×72 `0.51`.
+- **Decision B — coat identity:** `separate-costume-frames`, confidence `1.00`; returned probabilities: separate costume frames `1.00`, runtime tint `0.00`, reuse doctor row `0.00`.
+- **Usage metadata:** 733 input / 116 output tokens. No request ID was returned.
+- **Application:** create a reversible 48×72 Stage A candidate, preserve the Player's identity by using distinct scrubs/coat rows from one art master, and retain 32×48 / 40×64 / 48×72 comparison. JEV's frame-size confidence is low; do not expand the remaining cast before owner approval.

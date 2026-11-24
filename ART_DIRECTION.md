@@ -47,6 +47,8 @@ Use a working palette of about 24–40 colors per asset family; share outline, s
 ## Character and animation rules
 
 - Match the current chibi MMORPG identity, but use layered hair, face shading, readable eyes, distinct silhouettes, clothing seams and shoe details.
+- Character rebuild Stage A uses an original 48×72 logical-pixel candidate at 4× authoring scale. Its 192×288 source cells render at `.1`, keeping a 19.2×28.8 world-pixel frame. Compare against the 32×48 and 40×64 variants at equal display footprint before approving the roster-wide standard.
+- Stage A prototypes are Player, Maya and Reception only. Player scrubs and coat are separate art rows from one master identity; the coat must never borrow a doctor/NPC row. Do not expand the remaining cast until the owner approves the prototype.
 - All frames in a strip share frame size, anchor, palette and identity. Use a single approved base frame as the source of truth.
 - Walk cycles retain a grounded foot line. Body parts remain connected at pivots; do not rotate an entire standing figure to fake a new pose.
 - Patient pose changes must be visibly linked to the positioning UI and return to a safe neutral pose. Keep animation stylized and educational; it is not a real clinical instruction.

@@ -13,7 +13,7 @@
 
 | Phase | สถานะใน build นี้ |
 |---|---|
-| 1 · Visual upgrade | ปรับรอบนี้: เพิ่ม character atlas 6 บทบาท × 4 ทิศ × 4 เฟรมเดิน (เฟรมต้นฉบับ 32×48 พิกเซล), แทน canvas-วาดตัวละครเดิม โดยคงขนาดแสดงผล/hitbox เดิม; เพิ่ม PixelFX cyan acquisition burst หลังจบ X-ray |
+| 1 · Visual upgrade | มี atlas legacy 6 บทบาท และ Stage A prototype ใหม่ Player/Maya/Reception ที่ 48×72 logical px × 4 ทิศ × 4 เฟรม; Player scrubs/coat ใช้ identity เดียวกันและคงขนาดแสดงผล/hitbox เดิม; Stage A รอเจ้าของอนุมัติก่อนขยายอีก 5 ตัว; เพิ่ม PixelFX cyan acquisition burst หลังจบ X-ray |
 | 2 · RPG systems | ทำแล้ว: XP/level/SP, 20-node skill tree, inventory, equipment, collection, shop, crafting, save migration and zone-specific player positions |
 | 3 · Quest system | ทำแล้วใน vertical slice: main, side, daily, hidden-cache quests, rewards, relationship counters และ story journal 5 บท |
 | 4 · Radiology gameplay | เล่นจบได้: Chest PA, patient verification, positioning/pose (พักแขน/ซ้าย/ขวา/ยกสองแขน), collimation, timing, synthetic image review, quality feedback |
@@ -42,7 +42,9 @@ npm run preview     # เปิดดู production build ในเครื่�
 
 ผลตรวจ checkpoint ก่อนหน้า (2026-11-24): `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright ผ่าน full gameplay regression และกดปุ่ม E บนจอเพื่อไปจาก lobby ผ่าน Reception เข้าห้อง X-ray บน desktop และ iPad emulation. ปุ่มมองเห็นและกดได้ที่ 1440×900, 1024×768, 390×844, แนวนอน 844×390 และจอ 390×844 แบบเมาส์; ไม่พบ browser error. การทดสอบเป็น browser emulation ไม่ใช่เครื่อง iPad จริง. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
 
-ผลตรวจ re-audit (2026-11-25): `npm ci`, `npm run build`, `git diff --check` ผ่าน. Playwright headed Chromium ยืนยันคำสั่ง E ให้ตรงกับ target หลังสร้าง UI ใหม่, เปิดบทสนทนา Reception ได้ และแสดงประตูล็อกจนรับใบส่งตรวจ; 0 console errors / 0 warnings. ยังไม่ได้ทดสอบ full gameplay หรือ mobile ในรอบนี้; ดู [AUDIT_REPORT.md](AUDIT_REPORT.md) สำหรับขอบเขตที่ตรวจและสิ่งที่ยังค้าง.
+ผลตรวจ re-audit (2026-11-25): `npm ci`, `npm run build`, `git diff --check` ผ่าน. Playwright headed Chromium ยืนยันคำสั่ง E ให้ตรงกับ target หลังสร้าง UI ใหม่, เปิดบทสนทนา Reception ได้ และแสดงประตูล็อกจนรับใบส่งตรวจ; 0 console errors / 0 warnings. ยังไม่ได้ทดสอบ full gameplay หรือ mobile ในรอบนั้น; ดู [AUDIT_REPORT.md](AUDIT_REPORT.md) สำหรับขอบเขตที่ตรวจและสิ่งที่ยังค้าง.
+
+ผลตรวจ Character Stage A (2026-11-25): `npm run build` ผ่าน; Playwright ตรวจหน้า Hub ที่ 1440×900, 1024×768, 844×390 และ 390×844; E เปิดบทสนทนาได้สำหรับ Maya และ Reception; portrait แสดงตัวละครตรงกัน; ไม่พบ asset โหลดล้มเหลวหรือ Phaser error (มี 404 ของ `/favicon.ico` เท่านั้น). ดู [ART_REBUILD_REPORT.md](ART_REBUILD_REPORT.md); X-ray scene และการสวมเสื้อกาวน์ยังไม่ได้ทดสอบผ่าน UI ในรอบนี้.
 
 ## งานภาพและแหล่ง asset
 
@@ -121,7 +123,7 @@ npx --yes gh-pages@6.3.0 -d dist -b gh-pages
 |---|---|---|
 | `phaser-engineer` | `C:/Users/phumshop/.codex/skills/phaser-engineer` | ใช้ออกแบบ Phaser scenes, physics, input และ save schema |
 | `pixelfx` | [patch-gg/pixelfx](https://github.com/patch-gg/pixelfx), `skills/pixelfx` | ใช้ confetti และ `collect-burst` ที่ปรับเป็น cyan สำหรับผลรับภาพ X-ray; MIT, ดู notices ใน repo |
-| `astra-pixel-art` | [Shanghaitech-DataTech/PixelSkill](https://github.com/Shanghaitech-DataTech/PixelSkill), `skills/astra-pixel-art` | ติดตั้งไว้ที่ `C:/Users/phumshop/.agents/skills/astra-pixel-art`; ใช้วาดภาพพอร์ตเทรต 96×96 แบบ layered PNG ด้วย Python มาตรฐาน (MIT) |
+| `astra-pixel-art` | [Shanghaitech-DataTech/PixelSkill](https://github.com/Shanghaitech-DataTech/PixelSkill), `skills/astra-pixel-art` | ติดตั้งไว้ที่ `C:/Users/phumshop/.agents/skills/astra-pixel-art`; ใช้วาด sprite 48×72 logical px และ portrait 96×96 แบบ layered PNG ด้วย Python มาตรฐาน (MIT) |
 | `spritecast` | [Sunghwan0112/spritecast](https://github.com/Sunghwan0112/spritecast), `skills/spritecast` | มีในเครื่อง/ตรวจวิธีใช้แล้ว; ยังไม่สร้าง asset เพราะ pipeline สร้างภาพใช้ API แบบคิดค่าใช้จ่ายและไม่ได้จำเป็นกับงานโค้ดพิกเซลชุดนี้ |
 | `generate2dsprite`, `video2dsprite`, `generate2dmap`, `generate2dmedia`, `codeart2d` | [0x0funky/agent-sprite-forge](https://github.com/0x0funky/agent-sprite-forge), `skills/<skill>/SKILL.md`; MIT | ติดตั้งไว้ที่ `C:/Users/phumshop/.codex/skills/`; ใช้ทำ master sprite/props, แอนิเมชัน, map/tiles, ตรวจเส้นทางสื่อ และงาน code-drawn ตามข้อกำหนดของแต่ละสกิว; รองรับ export สำหรับเว็บ/Aseprite JSON ที่ Phaser ใช้ต่อได้ |
 | `img2threejs` | [img2threejs/img2threejs](https://github.com/img2threejs/img2threejs), repository root `SKILL.md` | มีในเครื่อง/ตรวจแล้ว; ไม่ใช้เพราะเกมนี้เป็น 2D pixel และไม่มีโมเดล 3D |

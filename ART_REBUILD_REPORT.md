@@ -1,8 +1,54 @@
 # RADTECH PIXEL — Art Rebuild Checkpoint
 
-Updated: 2026-11-25
+Updated: 2026-11-25 · Character Stage A prototype
 
-## Audit findings
+## Latest checkpoint — Character Art Rebuild Stage A
+
+### 1. Current visual problems
+
+- Player and multiple NPCs previously shared atlas rows; Player/Kai and Radiologist/Engineer were visually duplicated.
+- Equipping the Player coat selected Radiologist row 5, changing the Player's face and hair.
+- Existing sprites had little room for facial and fabric details; the Player HUD portrait showed a white coat while the world sprite wore blue scrubs.
+- Dialogue used the Maya portrait for Reception.
+
+### 2. Reference images reviewed
+
+- Owner-supplied hospital and X-ray screenshots were treated as composition/style references only.
+- Reviewed the SKIMA 48×80 sprite listing, Ameba 48×72 article, OpenGameArt 40×64 CC0 walk-cycle listing, and Pipoya CharaMEL atlas page. The reference assets were not downloaded into the game, traced or copied. Direct image fetches for the SKIMA/Ameba/itch previews were blocked or timed out, so comparison was based on the owner screenshots and the readable source-page descriptions.
+
+### 3. Skills actually used
+
+- `radtech-pixel-art-direction`: read project art bible; applied palette, crisp outlines, shadow, original-art and in-game QA rules.
+- `sprite-pipeline`: read and applied fixed frame cells, shared baseline, four-facing strip layout and contact-sheet inspection. The prototype is procedural rather than image-generated; there was no paid generation step.
+- `astra-pixel-art`: actually invoked to draw/export the Stage A sprite sheet and 12 portrait expressions from deterministic scripts.
+- `phaser-engineer`: read and applied spritesheet frame mapping, preserved runtime footprint, and recalculated Arcade local size/offset so effective body dimensions remain the same.
+- `game-playtest` + `playwright`: used headed Chromium for actual Phaser render, E interactions, console and responsive viewport screenshots.
+- `jev-system-one`: made a live bounded choice call; see the JEV subsection below.
+- `imagegen` / `spritecast`: not invoked. Stage A did not need a paid provider; no cost was authorized.
+
+### 4–8. Artwork, dimensions, animation, portraits and integration
+
+- Added `scripts/draw-character-prototypes.py`, creating a 4-row × 16-frame atlas: Player scrubs, Player coat, Maya and Reception. Each cell is 192×288 texture pixels / 48×72 logical pixels, four facings × four walk frames. The authored strip uses a shared foot baseline, shadow and head/hair identity per character.
+- Phaser scale is `.1`; 192×288 source gives a 19.2×28.8 world-pixel frame. Arcade body size/offset changed from 68×74 at `.15` to 102×111 at `.1`, retaining the exact same effective 10.2×11.1 body and 4.5×15.6 offset.
+- Added a named Stage A row map. Player scrubs and coat now select rows 0/1 from the same Player master; Maya and Reception select Stage A rows 2/3. Other five roles remain on the legacy atlas until the owner approves the visual direction.
+- Rebuilt `scripts/draw-pixel-portraits.py` into layered Player/Maya/Reception artwork with smile/default, neutral, talk and concern variants (12 portrait files total). Player portrait now uses blue scrubs, and Reception dialogue selects her own talking portrait.
+- X-ray patient and radiographer assets were not replaced in this gate. The X-ray room already uses its own sheet and remains a later consistency stage.
+
+### 9–14. Screenshots, build, QA and Git
+
+- Phaser screenshots: `output/playwright/character-after-1440x900.png`, `character-after-1024x768.png`, `character-after-844x390.png`, `character-after-390x844.png`, and `character-reception-dialogue.png`.
+- Frame-size comparison: `output/playwright/character-size-comparison.png` uses the Player master downsampled to 32×48, 40×64 and 48×72 source cells at near-equal world footprint.
+- The requested sizes were inspected at four responsive browser viewports. Keyboard E opened Maya and Reception dialogue; Reception portrait matched the nurse. The canvas and sprite sheet loaded. Browser console contained only the existing `/favicon.ico` 404; no Phaser error or character-asset load failure.
+- `npm run build`: passed (TypeScript + Vite); Vite retained the existing >500 kB bundle warning.
+- No collision/gameplay rule changed. The saved profile schema was not changed. The effective player/NPC physics body is mathematically preserved, but X-ray scene switching and a UI-acquired coat were not exercised in this pass.
+- Git target: `art/character-rebuild`, source branch only; no merge or GitHub Pages deployment. Editable ASTRA JSON state for the 13 large new variant sheets is excluded from Git to avoid adding roughly 69 MB; deterministic drawing scripts, runtime PNGs and the project’s smaller base portrait states remain available.
+
+### JEV — visual size and outfit decision
+
+- Live TypeSafe SDK call, model `jev-1.14.0`; selected `48x72` (confidence `0.26`; probabilities: 32×48 `0.12`, 40×64 `0.37`, 48×72 `0.51`) and `separate-costume-frames` (confidence `1.00`). Usage: 733 input / 116 output tokens; no request ID returned.
+- Frame-size confidence is low, so this is only a Stage A comparison candidate, not a final approval. It does not override the prompt's size comparison or owner approval gate.
+
+## Previous art checkpoint
 
 | Area | Before | This checkpoint | Still incomplete |
 |---|---|---|---|
