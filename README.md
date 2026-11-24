@@ -42,7 +42,13 @@ npm run preview     # เปิดดู production build ในเครื่�
 
 ## งานภาพและแหล่ง asset
 
-พร็อพและฉากที่เพิ่มเป็นงานต้นฉบับใน `scripts/draw-hospital-world.py` และ `scripts/draw-hospital-props.py` วาดและ export ด้วย Astra Pixel Art; ไฟล์ใช้ในเกมอยู่ใน `public/assets/` พร้อมภาพ export ความละเอียด 2× และ editable state ใน `pixelart/exports/`. ภาพอ้างอิงจากเจ้าของใช้กำกับองค์ประกอบเท่านั้น ไม่ได้ใช้เป็นฉากหลังหรือดึง asset จากเกมอื่น. ดูที่มาและสถานะ license ได้ใน [ASSET_CATALOG.md](ASSET_CATALOG.md).
+พร็อพและฉากโรงพยาบาลเป็นงานต้นฉบับใน `scripts/draw-hospital-world.py` และ `scripts/draw-hospital-props.py` ส่วนห้อง X-ray ใช้พื้นผิว ผังอุปกรณ์ และ sprite sheet ตัวละครแยกกันจาก `scripts/draw-xray-room.py` ทุกภาพวาดและ export ด้วย Astra Pixel Art; ไฟล์ runtime อยู่ใน `public/assets/` และภาพต้นฉบับ 2× อยู่ใน `pixelart/exports/` โดยเก็บต้นฉบับที่แก้ต่อได้ไว้ในสคริปต์และ `pixelart/session.jsonl`. ภาพอ้างอิงจากเจ้าของใช้กำกับองค์ประกอบเท่านั้น ไม่ได้ใช้เป็นฉากหลังหรือดึง asset จากเกมอื่น. ดูที่มาและสถานะ license ได้ใน [ASSET_CATALOG.md](ASSET_CATALOG.md).
+
+### สกิลสำหรับ AI ที่ทำงานต่อ
+
+สกิลโปรเจกต์ติดตั้งไว้ใน `.agents/skills/`: Phaser 2D, sprite pipeline, game UI, web-game foundations, game playtest และ game-studio จาก [OpenAI Plugins](https://github.com/openai/plugins/tree/main/plugins/game-studio/skills) พร้อม `radtech-pixel-art-direction` ที่เพิ่มกติกาภาพเฉพาะเกมนี้ แต่ละโฟลเดอร์มี `SKILL.md` ให้อ่านก่อนทำงาน สกิลเหล่านี้เป็นแนวทางสำหรับเอเจนต์ ไม่ใช่ dependencies ของ runtime เกม
+
+ดู [ART_DIRECTION.md](ART_DIRECTION.md), [ASSET_CATALOG.md](ASSET_CATALOG.md) และ [AUDIT_REPORT.md](AUDIT_REPORT.md) ก่อนทำงานต่อ
 
 ## วงจรเกมที่ทำงานได้
 
@@ -80,7 +86,7 @@ public/
 - `src/game/content.ts` / `progression.ts`: data catalog, 20 skills, quests, story chapters, item drops and schema-5 local save migration.
 - `src/game/dungeon-scene.ts`: single-player Lost Imaging Lab, authored movement/collision and knowledge encounters.
 - `src/game/network/contracts.ts`: type-only boundary for future presence/party/co-op/leaderboard transport; no real online connection.
-- `scripts/draw-pixel-portraits.py` and `scripts/draw-hospital-world.py`: reproducible artwork scripts for the Astra Pixel Art skill; editable exports/state are under `pixelart/exports/`.
+- `scripts/draw-pixel-portraits.py`, `scripts/draw-hospital-world.py` and `scripts/draw-xray-room.py`: reproducible artwork scripts for the Astra Pixel Art skill; editable exports/state are under `pixelart/exports/`.
 
 ## การบันทึก
 

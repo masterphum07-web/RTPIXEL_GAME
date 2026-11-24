@@ -50,6 +50,15 @@ Audit reference: local `main` checkout based on `482d5c5` before this update. Re
 - Increased the on-screen player/NPC sprite size, added a short deterministic student patrol, and animated the patient entering the X-ray position.
 - Re-authored original grass/window details and added original transparent pixel-art prop sprites. Sources are `scripts/draw-hospital-world.py` and `scripts/draw-hospital-props.py`; credits and asset licenses are in `ASSET_CATALOG.md`.
 
+## X-ray visual revision (2026-11-24)
+
+- Replaced the rectangle-only `RoomScene` artwork with separate 2× pixel-art wall/floor, equipment, and actor-strip assets. The strip has fixed-size patient walk/rest/arm-raised frames plus a radiographer frame; a short stepped entrance and restrained idle motion play in Phaser.
+- Expanded the positioning mini-game patient board in the DOM UI with larger pixel-art-style clothing, limbs, and face treatment. Pose selection still emits the existing `patient-pose` event; the quest, save and mission flow remains intact.
+- Added `ART_DIRECTION.md` and project-local agent instructions under `.agents/skills/`; added source/license records in `ASSET_CATALOG.md`.
+- Local QA captures: `output/playwright/xray-redesign-1440x900.png`, `output/playwright/xray-redesign-positioned-1440x900.png` and iPad-viewport `output/playwright/xray-redesign-1024x768.png` (ignored by Git).
+- `npm run build`: passed. Existing Playwright end-to-end test passed the quest, X-ray, reward, shop/equipment and dungeon flow after the art/CSS change. The interaction/analog-control test also passed E hold-to-range, one-shot dialogue, target prompt and iPad/mobile emulation. Browser runs captured the room at 1440×900 and 1024×768 with no page errors.
+- The Vite bundle-size warning remains non-blocking. These are hand-authored low-frame-count game animations, not 120 fps video. Physical iPad Safari remains untested.
+
 ## Verification results
 
 - `npm run build`: passed. Vite reports a non-blocking client bundle-size warning (about 1.31 MB minified / 353 kB gzip).

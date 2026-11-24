@@ -8,3 +8,4 @@ output/playwright/
 !.env.example
 
 pixelart/previews/
+pixelart/exports/xray-*.pixelart.json
