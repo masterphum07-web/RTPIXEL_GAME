@@ -4,20 +4,22 @@
 
 ## สถานะวันนี้
 
-- เกมเป็นเว็บ 2D pixel RPG สร้างด้วย Phaser 3, TypeScript และ Vite
+- เกมเป็นเว็บ 2D pixel RPG สร้างด้วย Phaser 3, TypeScript และ Vite; ฮับใช้ viewport 512×288 ให้เห็นแผนที่จริง 32×18 tiles
 - มีแผนกโรงพยาบาลแบบ top-down, ตัวละครเดินได้, NPC, บทสนทนา, เควสต์วันแรก และห้องฝึก X-ray แบบ side-view
 - มีเคสจำลอง, มินิเกมจัดท่า/กำหนดขอบเขต/จับจังหวะ, XP, เหรียญ และบันทึกด้วย `localStorage`
+- จอยสัมผัส analog 360° มี dead zone, ปล่อยแล้วหยุดและรองรับปุ่ม E แยกนิ้ว; prompt ยึดพิกัดเป้าหมายและ interaction ตรวจแนวผนัง
+- สวนเพิ่มพร็อพ pixel art ต้นฉบับและ NPC patrol สั้น ๆ; คนไข้เดินเข้าตำแหน่งก่อนจัดท่าจำลอง
 - สถานะและผู้เล่นยังอยู่ในเครื่องเดียว ไม่มีบัญชี, เซิร์ฟเวอร์, ผู้เล่นออนไลน์, ร้านค้าจริง หรือการบันทึกข้ามอุปกรณ์
 - GitHub Pages ทำหน้าที่โฮสต์ไฟล์เว็บ static ได้ แต่ไม่ใช่เซิร์ฟเวอร์สำหรับโลก MMORPG
 
-## ผลงานใน checkout ปัจจุบัน (ยังไม่ publish)
+## ผลงานใน checkout ปัจจุบัน
 
 - Phase 1–5 มี vertical slice ที่เล่นได้: hub, 4-direction character frames, quest progression, RPG profile/items/skills/shop, animated patient pose, complete Chest PA simulation and knowledge combat.
 - Phase 6 มี Lost Imaging Lab หนึ่งด่านจริงพร้อม Noise Slime, Motion Phantom, Noise King, drops และรางวัลเคลียร์ด่าน; Positioning Maze และ Phantom Archive ยังไม่ได้ทำเป็น playable zone.
 - Phase 7 มี narrative catalog 5 บท, chapter progression, relationships, hidden cache และ collection; Chapters 3–5/Caves/City/Archive ยังเป็น outline/locked.
 - Phase 8 มี TypeScript contracts สำหรับ presence/party/co-op/leaderboard และ transport boundary เท่านั้น ไม่มี auth/server/WebSocket/multiplayer.
 - `npm run build` ผ่าน และ Playwright ผ่าน flow เควสต์→X-ray→รายงานผล→Noise Lab encounter→ร้านและสวม cosmetic; ไม่มี browser console error ใน flow ที่ตรวจ.
-- ยังไม่ push หรือ deploy ตามคำสั่งเจ้าของโปรเจกต์.
+- Source repository คือ branch `main`; GitHub Pages เป็น deployment branch แยก จึงไม่เปลี่ยนจนกว่าจะ deploy โดยชัดแจ้ง.
 
 ## หลักการออกแบบ
 
@@ -34,15 +36,15 @@
 
 **เป้าหมาย:** ทุกการกระทำตอบสนองตรงกับสิ่งที่ผู้เล่นเห็น
 
-**สถานะรอบนี้:** แก้ input E ให้กดค้างระหว่างเดินเพื่อรอเข้า range, เลือกเป้าหมายที่อยู่ในระยะจริง และย้ายปุ่มมือถือไปเป็น control คงที่พร้อมคำอธิบายเป้าหมายแล้ว
+**สถานะรอบนี้:** ทำแล้วและตรวจด้วย Playwright: E กดค้างรอเข้า range ได้ครั้งเดียว, เลือกเป้าหมายจากระยะ/ทิศ/ผนังกั้น, prompt ยึดตำแหน่งเป้าหมาย และจอย analog ทำงานพร้อม touch E.
 
 - แก้ E/ปุ่มโต้ตอบให้กดครั้งเดียวได้ กดค้างระหว่างเดินได้ และไม่ยิงบทสนทนาซ้ำ
 - ปุ่มสัมผัสแสดงคำอธิบายเป้าหมายปัจจุบันและอยู่กับแผงควบคุม ไม่ลอยตามกล้อง
-- ทำ interaction priority ให้เลือก NPC/ประตูที่เข้าใกล้และโต้ตอบได้จริง
+- ให้ NPC ที่อยู่ในมุมมองด้านหน้าได้ priority และให้เป้าหมายระยะประชิดทำงานแม้ผู้เล่นหันเฉียง
 - ตรวจลำดับเควสต์ตั้งแต่รับภารกิจ รับใบส่งตรวจ เข้าห้อง ทำเคส และรายงานผล
 - ตรวจการเข้าออก scene, บันทึก/โหลด, ความละเอียดมือถือ และ error ใน browser console
 
-**เกณฑ์ผ่าน:** เล่น flow เควสต์ตั้งแต่ต้นจนจบด้วยคีย์บอร์ดและจอสัมผัสได้ โดยไม่ต้องรีโหลดเพื่อแก้ปุ่มค้างหรือเควสต์ติด
+**เกณฑ์ผ่าน:** ผ่าน flow เควสต์ด้วยคีย์บอร์ด; E hold-to-range, one-shot dialogue, target prompt, จอย analog และ touch control ผ่าน browser emulation. ยังไม่ได้ทดสอบบน iPad เครื่องจริง.
 
 ### Phase 1 — Vertical slice แบบเล่นจบหนึ่งวัน
 

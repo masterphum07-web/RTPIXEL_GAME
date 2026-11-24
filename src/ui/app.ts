@@ -61,7 +61,7 @@ function worldScreen(){
     <aside class="main-quest rpg-window"><div class="quest-title"><span class="quest-glyph">▤</span><b>Main Mission</b></div><div class="quest-step"><i></i><span>${profile.questStep>=5?'เควสต์แรกสำเร็จแล้ว':questObjective()}</span></div><div class="quest-mini-progress"><i style="width:${Math.min(100,profile.questStep*20)}%"></i></div></aside>
     <aside class="hospital-map rpg-window"><b>Hospital Map</b><div class="map-grid"><i class="map-building"></i><i class="map-garden"></i><i class="map-walk"></i><i class="map-pin">◆</i></div></aside>
     <div class="world-controls"><span>WASD / ← ↑ ↓ → เดิน</span><span><kbd>E</kbd> โต้ตอบ</span></div>
-    <div class="touch-pad"><button data-move="up" aria-label="เดินขึ้น">▲</button><div><button data-move="left" aria-label="เดินซ้าย">◀</button><button data-move="down" aria-label="เดินลง">▼</button><button data-move="right" aria-label="เดินขวา">▶</button></div><button class="touch-interact" data-action="touch-interact" aria-label="${interactLabel}" title="${interactLabel}">E</button></div>
+    <div class="touch-pad"><div class="virtual-joystick" data-joystick role="application" aria-label="จอยสติ๊กเดิน 360 องศา"><span class="joystick-ring"></span><span class="joystick-thumb"></span></div><button class="touch-interact" data-action="touch-interact" aria-label="${interactLabel}" title="${interactLabel}">E</button></div>
     <nav class="rpg-dock"><button data-view="inventory"><span class="dock-icon">▣</span><b>Bag</b></button><button data-view="library"><span class="dock-icon">⚑</span><b>Quest</b></button><button data-view="skills"><span class="dock-icon">★</span><b>Skills</b></button><button data-view="world-map"><span class="dock-icon">⌖</span><b>Map</b></button></nav>
     ${view==='dungeon'?'':`<aside class="mentor-dialog rpg-window"><img src="${base}assets/mentor-portrait.png" alt="พี่มายา"/><div><b>${dialogueName}</b><p>${dialogueKind==='welcome'?text:dialogueText||text}</p>${dialogueKind==='mentor'&&profile.questStep===0?'<button class="dialogue-action" data-action="accept-quest">รับเควสต์ · FIRST DAY →</button>':''}${dialogueKind==='reception'&&profile.questStep===1?'<button class="dialogue-action" data-action="accept-referral">รับใบส่งตรวจ →</button>':''}${dialogueKind==='radiology-door'&&profile.questStep>=2&&profile.questStep<4?`<button class="dialogue-action" data-start="${activeCase.id}">เข้าเคส Chest PA →</button>`:''}<button class="dialogue-next" data-action="close-dialogue">▼</button></div></aside>`}
     ${view==='dungeon'?`<aside class="dungeon-objective rpg-window"><b>NOISE LABORATORY</b><span>${profile.completedQuests.includes('noise-lab-clear')?'พบทางออกทางซ้ายแล้ว':'สำรวจห้องและกด E เพื่อวิเคราะห์สิ่งรบกวน'}</span><small>เคสและศัตรูเป็นแบบจำลองเพื่อการเรียนรู้</small></aside>`:''}
@@ -161,7 +161,24 @@ function bindRpg(){
       requestAnimationFrame(()=>gameRef?.events.emit('virtual-interact',false));
     });
   }
-  root.querySelectorAll<HTMLElement>('[data-move]').forEach(el=>{const direction=el.dataset.move!;const down=(event:Event)=>{event.preventDefault();gameRef?.events.emit('virtual-move',direction,true);};const up=(event:Event)=>{event.preventDefault();gameRef?.events.emit('virtual-move',direction,false);};el.addEventListener('pointerdown',down);el.addEventListener('pointerup',up);el.addEventListener('pointerleave',up);el.addEventListener('pointercancel',up);});
+  const joystick=root.querySelector<HTMLElement>('[data-joystick]');
+  if(joystick){
+    let pointerId:number|null=null,cx=0,cy=0;
+    const thumb=joystick.querySelector<HTMLElement>('.joystick-thumb')!;
+    const reset=()=>{if(pointerId===null)return;pointerId=null;window.removeEventListener('blur',reset);window.removeEventListener('orientationchange',reset);thumb.style.transform='translate(0px,0px)';gameRef?.events.emit('virtual-joystick',0,0);};
+    const move=(event:PointerEvent)=>{
+      if(pointerId!==event.pointerId)return;
+      event.preventDefault();const radius=Math.max(1,joystick.clientWidth*.34),dx=event.clientX-cx,dy=event.clientY-cy,length=Math.hypot(dx,dy),scale=length>radius?radius/length:1;
+      const px=dx*scale,py=dy*scale,ratio=Math.min(1,length/radius),dead=.14,magnitude=ratio<=dead?0:(ratio-dead)/(1-dead);
+      const x=length?(dx/length)*magnitude:0,y=length?(dy/length)*magnitude:0;
+      thumb.style.transform=`translate(${px}px,${py}px)`;gameRef?.events.emit('virtual-joystick',x,y);
+    };
+    joystick.addEventListener('pointerdown',(event:PointerEvent)=>{
+      if(pointerId!==null)return;event.preventDefault();pointerId=event.pointerId;const rect=joystick.getBoundingClientRect();cx=rect.left+rect.width/2;cy=rect.top+rect.height/2;
+      try{joystick.setPointerCapture(event.pointerId);}catch{}window.addEventListener('blur',reset);window.addEventListener('orientationchange',reset);move(event);
+    });
+    joystick.addEventListener('pointermove',move);joystick.addEventListener('pointerup',reset);joystick.addEventListener('pointercancel',reset);joystick.addEventListener('lostpointercapture',reset);
+  }
 }
 function startCase(id:string){activeCase=CASES.find(c=>c.id===id&&unlocked(c))||CASES[0];if(profile.questStep===2)profile.questStep=3;view='mission';step=0;verified=positioned=collimated=breath=patientReady=false;score=null;xray='';miniGame=null;positionChoice='PA';patientOffset=2;poseChoice='rest';gameRef?.events.emit('patient-pose','rest');scanActive='';collimationChoice='optimal';technique={kvp:110,ma:31.25,mas:2.5,sid:180,oid:8,time:.08,grid:false,aec:false};save();render();}
 function expose(){if(!verified){timingMessage='เริ่มจาก Verify Patient ใน checklist ก่อน';render();return;}if(!positioned){miniGame='positioning';timingMessage='จัดท่าตามโจทย์ก่อนเปิดรับภาพ';render();return;}if(!collimated){miniGame='collimation';timingMessage='ตรวจขอบเขตภาพจำลองก่อนเปิดรับภาพ';render();return;}miniGame='timing';timingStarted=performance.now();timingMessage='';render();}
@@ -193,6 +210,13 @@ function render(){
 }
 export function mountApp(game:Phaser.Game){
   gameRef=game;
+  let lastInteractionTarget:string|null|undefined;
+  game.events.on('interaction-target',(kind:string|null)=>{
+    if(kind===lastInteractionTarget)return;lastInteractionTarget=kind;
+    const button=root.querySelector<HTMLButtonElement>('[data-action="touch-interact"]');if(!button)return;
+    const labels:Record<string,string>={mentor:'คุยกับพี่มายา',reception:'คุยกับ Reception',radiologist:'คุยกับนักรังสีแพทย์',engineer:'เปิดร้านอุปกรณ์',librarian:'เปิดคลังสะสม',student:'คุยกับรุ่นพี่','radiology-door':'เข้าห้อง X-ray','quest-board':'เปิดกระดานภารกิจ','hidden-cache':'ค้นหากล่องลับ','lab-gate':'เข้าห้องวิจัย'};
+    const label=kind?`[E] ${labels[kind]||'โต้ตอบ'}`:'เดินเข้าใกล้ตัวละครหรือสิ่งของเพื่อโต้ตอบ';button.setAttribute('aria-label',label);button.title=label;
+  });
   game.events.on('world-dialogue',(kind:string)=>onWorldDialogue(kind));
   game.events.on('request-player-outfit',(reply:(equipped:boolean)=>void)=>reply(profile.equipped.includes('pixel-coat')));
   game.events.on('request-world-position',(reply:(position:{x:number;y:number}|null)=>void)=>reply(profile.worldPositions[profile.currentZone]||null));

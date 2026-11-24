@@ -15,6 +15,7 @@ export class DungeonScene extends Phaser.Scene {
   private player!:Phaser.Physics.Arcade.Sprite;
   private keys!:Record<string,Phaser.Input.Keyboard.Key>;
   private virtual:Record<Direction,boolean>={up:false,down:false,left:false,right:false};
+  private joystick={x:0,y:0};
   private enemiesLive:Phaser.GameObjects.Container[]=[];
   private enemies:Enemy[]=enemies.map(enemy=>({...enemy}));
   private activeEnemy=0;
@@ -27,6 +28,7 @@ export class DungeonScene extends Phaser.Scene {
   private lastSavedX=0;
   private lastSavedY=0;
   private readonly handleMove=(direction:Direction,active:boolean)=>{if(direction in this.virtual)this.virtual[direction]=active;};
+  private readonly handleJoystick=(x:number,y:number)=>{this.joystick={x:Phaser.Math.Clamp(x,-1,1),y:Phaser.Math.Clamp(y,-1,1)};};
   private readonly handleKeyInteract=()=>{if(!this.held){this.held=true;this.tryInteract();}};
   private readonly handleVirtualInteract=(active:boolean)=>{if(active){if(!this.held){this.held=true;this.tryInteract();}}else this.held=false;};
   private readonly handleAnswer=(choice:number,skill?:string)=>this.answer(choice,skill);
@@ -62,17 +64,17 @@ export class DungeonScene extends Phaser.Scene {
     this.physics.add.collider(this.player,walls);this.cameras.main.startFollow(this.player,true,.16,.16);this.cameras.main.setBounds(0,0,512,288);
     this.keys={W:this.input.keyboard!.addKey('W'),A:this.input.keyboard!.addKey('A'),S:this.input.keyboard!.addKey('S'),D:this.input.keyboard!.addKey('D'),UP:this.input.keyboard!.addKey('UP'),DOWN:this.input.keyboard!.addKey('DOWN'),LEFT:this.input.keyboard!.addKey('LEFT'),RIGHT:this.input.keyboard!.addKey('RIGHT'),E:this.input.keyboard!.addKey('E')};
     this.input.keyboard!.on('keydown-E',this.handleKeyInteract);
-    this.game.events.on('virtual-move',this.handleMove);this.game.events.on('virtual-interact',this.handleVirtualInteract);this.game.events.on('combat-answer',this.handleAnswer);this.game.events.on('combat-continue',this.handleContinue);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{this.input.keyboard?.off('keydown-E',this.handleKeyInteract);this.game.events.off('virtual-move',this.handleMove);this.game.events.off('virtual-interact',this.handleVirtualInteract);this.game.events.off('combat-answer',this.handleAnswer);this.game.events.off('combat-continue',this.handleContinue);this.game.events.off('player-outfit',this.handleOutfit);});
+    this.game.events.on('virtual-move',this.handleMove);this.game.events.on('virtual-joystick',this.handleJoystick);this.game.events.on('virtual-interact',this.handleVirtualInteract);this.game.events.on('combat-answer',this.handleAnswer);this.game.events.on('combat-continue',this.handleContinue);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{this.input.keyboard?.off('keydown-E',this.handleKeyInteract);this.game.events.off('virtual-move',this.handleMove);this.game.events.off('virtual-joystick',this.handleJoystick);this.game.events.off('virtual-interact',this.handleVirtualInteract);this.game.events.off('combat-answer',this.handleAnswer);this.game.events.off('combat-continue',this.handleContinue);this.game.events.off('player-outfit',this.handleOutfit);this.joystick={x:0,y:0};});
     this.add.text(18,266,'EXIT ←',{fontFamily:'monospace',fontSize:'7px',color:'#b4cde5'}).setScrollFactor(0).setDepth(30);
     this.drawEnemies();
   }
 
   update(){
     if(this.encounterOpen){this.player.setVelocity(0,0);return;}
-    let x=(this.keys.LEFT.isDown||this.keys.A.isDown||this.virtual.left?-1:0)+(this.keys.RIGHT.isDown||this.keys.D.isDown||this.virtual.right?1:0);
-    let y=(this.keys.UP.isDown||this.keys.W.isDown||this.virtual.up?-1:0)+(this.keys.DOWN.isDown||this.keys.S.isDown||this.virtual.down?1:0);
-    if(x&&y){x*=.707;y*=.707;}this.player.setVelocity(x*68,y*68);
+    let x=(this.keys.LEFT.isDown||this.keys.A.isDown||this.virtual.left?-1:0)+(this.keys.RIGHT.isDown||this.keys.D.isDown||this.virtual.right?1:0)+this.joystick.x;
+    let y=(this.keys.UP.isDown||this.keys.W.isDown||this.virtual.up?-1:0)+(this.keys.DOWN.isDown||this.keys.S.isDown||this.virtual.down?1:0)+this.joystick.y;
+    const magnitude=Math.hypot(x,y);if(magnitude>1){x/=magnitude;y/=magnitude;}this.player.setVelocity(x*68,y*68);
     if(x||y){const facing=Math.abs(x)>Math.abs(y)?(x<0?2:3):(y<0?1:0),frameBase=(this.coatEquipped?5:2)*16;this.player.setFrame(frameBase+facing*4+(Math.floor(this.time.now/125)%4));}
     if(this.time.now-this.positionSaveClock>2000&&(Math.abs(this.player.x-this.lastSavedX)>3||Math.abs(this.player.y-this.lastSavedY)>3)){this.positionSaveClock=this.time.now;this.lastSavedX=this.player.x;this.lastSavedY=this.player.y;this.game.events.emit('world-position',{zone:'noise-lab',x:Math.round(this.player.x),y:Math.round(this.player.y)});}
     if(!this.keys.E.isDown&&this.held)this.held=false;

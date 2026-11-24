@@ -24,6 +24,26 @@ html,body,#app{width:100%;height:100%;min-height:100%;margin:0;overflow:hidden;b
 @media(max-width:760px){.world-canvas canvas,.mission-world canvas{width:100%!important;height:100%!important;object-fit:cover}}
 
 /* RPG progression panels share the established navy/cyan window language. */
+.world-canvas canvas,.mission-world canvas{object-fit:contain!important}
+.touch-pad{display:none}
+@media (pointer:coarse){
+  .touch-pad{display:contents}
+  .virtual-joystick{position:absolute;z-index:8;left:max(18px,env(safe-area-inset-left));bottom:calc(108px + env(safe-area-inset-bottom));width:clamp(116px,15vw,154px);height:clamp(116px,15vw,154px);display:grid;place-items:center;border-radius:50%;touch-action:none;-webkit-user-select:none;user-select:none}
+  .joystick-ring{position:absolute;inset:0;border:3px solid #b1d9ffb8;border-radius:50%;background:radial-gradient(circle,#7abcf526 0 45%,#122752a8 47% 100%);box-shadow:0 0 0 3px #14254ba8,inset 0 0 18px #8ad5ff38,0 4px 14px #07122d80}
+  .joystick-ring:before,.joystick-ring:after{content:"";position:absolute;background:#9cc7ed58}
+  .joystick-ring:before{left:50%;top:8%;bottom:8%;width:1px}.joystick-ring:after{top:50%;left:8%;right:8%;height:1px}
+  .joystick-thumb{position:relative;z-index:1;width:37%;height:37%;border:3px solid #d5efff;border-radius:50%;background:linear-gradient(145deg,#7fd8ffed,#24549beF 65%,#152a56);box-shadow:inset 0 3px 0 #d8f5ff82,0 3px 0 #0b1735,0 0 15px #60caff55;pointer-events:none}
+  .touch-pad .touch-interact{position:absolute;z-index:8;right:max(20px,env(safe-area-inset-right));bottom:calc(116px + env(safe-area-inset-bottom));width:clamp(54px,7vw,72px);height:clamp(54px,7vw,72px);border:3px solid #ffe68a;border-radius:50%;background:radial-gradient(circle at 35% 28%,#ffe99a,#ffb93e 58%,#ba5e24);color:#20305b;font:bold 18px 'DM Mono',monospace;box-shadow:0 0 0 3px #192951,0 0 18px #ffcc6559;touch-action:none;-webkit-user-select:none;user-select:none}
+  .touch-pad .touch-interact:active{transform:translateY(2px);filter:brightness(1.12)}
+}
+@media (pointer:coarse) and (min-width:761px){.touch-pad .touch-interact{bottom:calc(164px + env(safe-area-inset-bottom))}}
+@media (pointer:coarse) and (max-width:760px){
+  .virtual-joystick{left:max(14px,env(safe-area-inset-left));bottom:calc(132px + env(safe-area-inset-bottom));width:clamp(116px,32vw,140px);height:clamp(116px,32vw,140px)}
+  .touch-pad .touch-interact{right:max(16px,env(safe-area-inset-right));bottom:calc(142px + env(safe-area-inset-bottom));width:58px;height:58px}
+}
+@media (pointer:coarse) and (orientation:portrait){
+  .world-canvas canvas,.mission-world canvas{object-fit:cover!important}
+}
 .modal-window{overflow:auto;overscroll-behavior:contain;scrollbar-color:#5fd7ff #122452}
 .modal-window>h2{margin:5px 0 8px}
 .modal-window>p{color:#cad8ef;font-size:11px;line-height:1.5}

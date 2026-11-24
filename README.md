@@ -3,6 +3,7 @@
 เกมฝึกเรียนรู้รังสีเทคนิคแบบ 2D pixel RPG ภาษาไทยเป็นหลัก ใช้ Phaser 3 + TypeScript + Vite โลกหลักเป็นโรงพยาบาลมุมมอง top-down และภารกิจถ่ายภาพทรวงอกเป็นฉาก side-view แยกต่างหาก
 
 ดู [ROADMAP.md](ROADMAP.md) สำหรับแผนพัฒนาต่อแบบ MMORPG ตั้งแต่แก้ input, ขยายล็อบบี้/ร้านค้า/เควสต์, ทำท่าผู้ป่วย ไปจนถึงระบบออนไลน์
+ดู [AUDIT_REPORT.md](AUDIT_REPORT.md) สำหรับสถานะจริงแยก WORKING / INCOMPLETE / BROKEN / MISSING และผลตรวจ build/browser ล่าสุด
 
 > สถานะ: playable single-player prototype มีโลกโรงพยาบาล ภารกิจแรก มินิเกมฝึก และระบบบันทึกในเครื่อง ยังไม่มี backend หรือ multiplayer
 
@@ -10,7 +11,7 @@
 
 | Phase | สถานะใน build นี้ |
 |---|---|
-| 1 · Visual upgrade | ทำแล้ว: tile world, courtyard props, original pixel backdrop, NPC/player atlas 4 ทิศ × 4 เฟรม และ X-ray room |
+| 1 · Visual upgrade | ปรับรอบนี้: เปิดมุมมองให้เห็นแผนที่โรงพยาบาล 512×288 เต็มฉาก, เพิ่ม original pixel-art props สำหรับต้นไม้ น้ำพุ รถพยาบาล ม้านั่ง โคมไฟ แปลงดอกไม้และป้ายทาง, เพิ่มรายละเอียดพื้น/หน้าต่าง และเพิ่มแอนิเมชันคนไข้เข้าตำแหน่ง |
 | 2 · RPG systems | ทำแล้ว: XP/level/SP, 20-node skill tree, inventory, equipment, collection, shop, crafting, save migration and zone-specific player positions |
 | 3 · Quest system | ทำแล้วใน vertical slice: main, side, daily, hidden-cache quests, rewards, relationship counters และ story journal 5 บท |
 | 4 · Radiology gameplay | เล่นจบได้: Chest PA, patient verification, positioning/pose, collimation, timing, synthetic image review, quality feedback |
@@ -19,7 +20,7 @@
 | 7 · Story expansion | ระบบ chapter/relationship และบท 1–2 ต่อกับเควสต์/ดันเจียน; บท 3–5 และโซนต่อไปมี outline และเงื่อนไขล็อกไว้ |
 | 8 · Multiplayer preparation | เพิ่ม typed contracts สำหรับ presence/party/co-op/leaderboard/transport; ยังไม่มีบัญชี, server หรือ online play |
 
-งานนี้ยังอยู่ใน checkout เครื่องนี้และยังไม่ได้ upload/publish ไป GitHub. Save เป็นข้อมูล local ของ browser และไม่ได้ sync ข้ามอุปกรณ์.
+งานต้นทางอยู่บน branch `main` ของ `masterphum07-web/RTPIXEL_GAME`; การอัปเดต branch ต้นทางไม่ใช่การ publish ไป GitHub Pages โดยอัตโนมัติ และรอบนี้ยังไม่ได้ deploy. Save ยังอยู่ใน localStorage ของ browser และไม่ได้ sync ข้ามอุปกรณ์.
 
 ## เริ่มเล่น
 
@@ -30,14 +31,18 @@ npm ci
 npm run dev
 ```
 
-เปิด URL ที่ Vite แสดงในเทอร์มินัล เล่นด้วย **WASD / ปุ่มลูกศร** เพื่อเดิน และ **E** เพื่อคุยหรือโต้ตอบ ปุ่มทิศทางกับปุ่ม E บนหน้าจอใช้กับจอสัมผัสได้ด้วย
+เปิด URL ที่ Vite แสดงในเทอร์มินัล เล่นด้วย **WASD / ปุ่มลูกศร** เพื่อเดิน และ **E** เพื่อคุยหรือโต้ตอบ บน iPad/จอสัมผัสใช้ **จอยสติ๊ก analog 360°** ทางซ้ายและปุ่ม **E** ทางขวา; แตะค้างแล้วลากเพื่อเดิน ปล่อยเพื่อหยุด
 
 ```bash
 npm run build       # ตรวจ TypeScript และสร้าง production bundle ที่ dist/
 npm run preview     # เปิดดู production build ในเครื่อง
 ```
 
-การตรวจรอบนี้: `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright เล่น flow เควสต์, เคส X-ray, rewards, chapter completion, world map, Noise Lab encounter และซื้อ/สวม cosmetic ในร้านได้. Browser pass แยกเคลียร์ Noise Slime ทั้งสอง, Motion Phantom และ Noise King ได้รางวัลครั้งเดียวและขึ้น Chapter 3. ตรวจ browser console ที่ 1440×900 และ 390×844 ไม่มี error/request failed. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
+การตรวจรอบนี้: `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright ผ่าน flow เควสต์, เคส X-ray, rewards, chapter completion, Noise Lab encounters, ซื้อ/สวม cosmetic, E ค้างรอเข้า range และเปิดบทสนทนาครั้งเดียว, prompt เกาะเป้าหมาย และ movement vector จากจอยสัมผัส. ตรวจ 1920×1080, iPad จำลอง 1024×768 / 1180×820 / 1366×1024 และมือถือ 390×844; browser console ไม่มี error. การทดสอบเป็น browser emulation ไม่ใช่เครื่อง iPad จริง. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
+
+## งานภาพและแหล่ง asset
+
+พร็อพและฉากที่เพิ่มเป็นงานต้นฉบับใน `scripts/draw-hospital-world.py` และ `scripts/draw-hospital-props.py` วาดและ export ด้วย Astra Pixel Art; ไฟล์ใช้ในเกมอยู่ใน `public/assets/` พร้อมภาพ export ความละเอียด 2× และ editable state ใน `pixelart/exports/`. ภาพอ้างอิงจากเจ้าของใช้กำกับองค์ประกอบเท่านั้น ไม่ได้ใช้เป็นฉากหลังหรือดึง asset จากเกมอื่น. ดูที่มาและสถานะ license ได้ใน [ASSET_CATALOG.md](ASSET_CATALOG.md).
 
 ## วงจรเกมที่ทำงานได้
 

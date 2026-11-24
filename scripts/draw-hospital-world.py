@@ -6,20 +6,25 @@ W, H = 512 * S, 288 * S
 ground = new_canvas(W, H, name="hospital-ground")
 ground.rect(0, 0, W, H, "#34754d")
 
-# Garden turf: deliberately varied clusters instead of a repeating square tile.
-for ty in range(0, H, 32):
-    for tx in range(0, W, 32):
-        n = (tx * 13 + ty * 7) % 11
-        if n in (0, 3, 8):
-            ground.rect(tx + 3, ty + 6, 5, 2, "#43875a")
-            ground.rect(tx + 6, ty + 4, 3, 2, "#5b9a62")
-            ground.rect(tx + 20, ty + 20, 4, 3, "#2e6848")
-        elif n in (1, 5):
-            ground.rect(tx + 15, ty + 8, 6, 2, "#408456")
-            ground.rect(tx + 17, ty + 6, 3, 2, "#5b9a62")
-            ground.rect(tx + 5, ty + 22, 3, 2, "#2f6a49")
-        if (tx + ty) % 7 == 0:
-            ground.rect(tx + 27, ty + 11, 2, 2, "#77ae67")
+# Garden turf: layered grass patches, cool shadows and warm reflected light.
+for ty in range(0, H, 24):
+    for tx in range(0, W, 24):
+        n = (tx * 13 + ty * 7) % 17
+        if n in (0, 3, 8, 12):
+            ground.rect(tx + 2, ty + 7, 8, 3, "#43875a")
+            ground.rect(tx + 5, ty + 4, 5, 3, "#5b9a62")
+            ground.rect(tx + 17, ty + 17, 5, 3, "#2e6848")
+            ground.rect(tx + 18, ty + 15, 2, 2, "#78ad66")
+        elif n in (1, 5, 14):
+            ground.rect(tx + 13, ty + 8, 8, 3, "#408456")
+            ground.rect(tx + 16, ty + 5, 4, 3, "#5b9a62")
+            ground.rect(tx + 3, ty + 19, 4, 3, "#2f6a49")
+            ground.rect(tx + 7, ty + 18, 2, 2, "#7bae68")
+        if (tx * 3 + ty * 5) % 11 == 0:
+            ground.rect(tx + 21, ty + 5, 2, 2, "#83b66e")
+            ground.rect(tx + 20, ty + 7, 2, 1, "#b7c97a")
+        if (tx + ty * 2) % 13 == 0:
+            ground.rect(tx + 10, ty + 18, 2, 2, "#314f49")
 
 # Left ambulance road, with curb, dashed lane paint and road-side paving.
 ground.rect(30, 0, 104, H, "#303d55")
@@ -51,6 +56,11 @@ for x in range(132, 928, 64):
         if ((x // 64) + (y // 24)) % 3 == 0:
             ground.rect(x + 19, y + 11, 5, 2, "#d9c4ab")
             ground.rect(x + 21, y + 10, 2, 1, "#eadac3")
+# Fine paving chips and warm/cool reflection patches keep the plaza from reading flat.
+for y in range(272, 344, 16):
+    for x in range(144 + ((y // 16) % 2) * 24, 920, 48):
+        ground.rect(x, y + 5, 3, 2, "#e3d1ba")
+        ground.rect(x + 5, y + 7, 2, 1, "#9f8c83")
 for y in range(320, 544, 48):
     ground.rect(488, y, 48, 2, "#9a887e")
     ground.rect(512, y + 2, 1, 44, "#d2bca5")
@@ -91,7 +101,7 @@ for x in (286, 454, 570, 738):
     facade.rect(x + 5, 21, 2, 181, "#a9b1c7")
 
 # Window bays (world x=148, 196, 244, 292, 340), each with frame, reflection and sill.
-for x in (290, 376, 462, 548, 634, 720):
+for x in (290, 376, 462, 548, 634, 696):
     facade.rect(x, 38, 62, 100, "#354d79")
     facade.rect(x + 4, 42, 54, 88, "#4789ba")
     facade.rect(x + 7, 45, 48, 80, "#82b8d8")
@@ -103,6 +113,16 @@ for x in (290, 376, 462, 548, 634, 720):
     facade.rect(x + 6, 132, 58, 6, "#e5e2dc")
     facade.rect(x + 8, 138, 54, 4, "#8394b5")
     facade.rect(x + 2, 143, 66, 4, "#667ba5")
+    # Visible desks, instrument displays and soft interior light beyond the glass.
+    facade.rect(x + 10, 93, 43, 3, "#d5c6ad")
+    facade.rect(x + 13, 84, 15, 7, "#263d65")
+    facade.rect(x + 15, 86, 11, 4, "#62c0e5")
+    facade.rect(x + 35, 83, 12, 8, "#9aa8c2")
+    facade.rect(x + 38, 85, 7, 4, "#4e91bd")
+    facade.rect(x + 11, 110, 4, 10, "#e7e2d9")
+    facade.rect(x + 49, 111, 4, 9, "#ddd9d4")
+    facade.rect(x + 17, 51, 2, 20, "#e7f7f6")
+    facade.rect(x + 41, 55, 13, 2, "#dcf3f6")
 
 # Entry vestibule and blue double doors sit beneath the main sign.
 facade.rect(458, 160, 108, 66, "#334a75")

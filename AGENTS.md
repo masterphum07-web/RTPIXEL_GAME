@@ -9,11 +9,13 @@
 
 ## Current implementation
 
-- `hospital` scene: 16 px collision tilemap under a custom 2× pixel-art hospital/grounds background, follow camera, Arcade physics/collisions, characters/NPC contacts, WASD/arrows, E interaction, virtual d-pad and touch interact.
+- `hospital` scene: 16 px collision tilemap under a custom 2× pixel-art hospital/grounds background, full 512×288 viewport, Arcade physics/collisions, characters/NPC contacts, WASD/arrows, E interaction, analog virtual joystick and fixed touch-interact button.
 - Quest sequence: mentor → reception/referral → radiology door → Chest PA practice → radiologist debrief.
 - `room` scene: side-view X-ray setup with verify, positioning, collimation, exposure timing, fictional technique controls, synthetic image, deterministic feedback, XP/coins and PixelFX completion effect.
 - More cases, learning/reference panel, 20-skill progression, quest board/shop/crafting/collection, story journal, Noise Laboratory, localStorage schema 5 with zone-specific positions, responsive UI, PWA manifest/service worker and GitHub Pages publishing setup are included.
-- Original artwork is drawn in code and SVG, with new 96×96 pixel portraits and a 1024×576 (2× world-size) hub background generated as layered PNGs using Astra Pixel Art. Keep the 64×96 character source atlas scaled to the same 16×24 world footprint. Do not replace the top-down RPG with a dashboard or a 3D scene.
+- Original artwork is drawn in code, SVG and Astra Pixel Art scripts. `scripts/draw-hospital-world.py` exports the 1024×576 backdrop; `scripts/draw-hospital-props.py` exports transparent hospital props under `pixelart/exports/`. The prop atlas is sliced in `HospitalScene.createPropFrames`; keep those source frame bounds and `.5` image scale aligned if editing. The 64×96 character frames are displayed at `.3` scale with a smaller Arcade collision footprint. Preserve pixel-art rendering and the top-down RPG camera; do not replace the game with a dashboard or a 3D scene.
+- `HospitalScene.findInteractionTarget()` is the shared target selector: point-blank targets, forward-facing targets, distance, then type priority. Keep the prompt world-anchored and clean up all event listeners at scene shutdown. `virtual-joystick` is a normalized vector shared by hospital and dungeon scenes; retain the older `virtual-move` event for compatibility.
+- Art sources and notices are catalogued in `ASSET_CATALOG.md`; do not add unlicensed reference-game assets.
 
 ## Engineering rules
 
