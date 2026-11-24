@@ -4,6 +4,7 @@
 
 ดู [ROADMAP.md](ROADMAP.md) สำหรับแผนพัฒนาต่อแบบ MMORPG ตั้งแต่แก้ input, ขยายล็อบบี้/ร้านค้า/เควสต์, ทำท่าผู้ป่วย ไปจนถึงระบบออนไลน์
 ดู [AUDIT_REPORT.md](AUDIT_REPORT.md) สำหรับสถานะจริงแยก WORKING / INCOMPLETE / BROKEN / MISSING และผลตรวจ build/browser ล่าสุด
+ดู [ART_REBUILD_REPORT.md](ART_REBUILD_REPORT.md) สำหรับ audit ภาพก่อนปรับ, character atlas ใหม่, การใช้ PixelFX และงานภาพที่ยังเหลือ
 
 > สถานะ: playable single-player prototype มีโลกโรงพยาบาล ภารกิจแรก มินิเกมฝึก และระบบบันทึกในเครื่อง ยังไม่มี backend หรือ multiplayer
 
@@ -11,7 +12,7 @@
 
 | Phase | สถานะใน build นี้ |
 |---|---|
-| 1 · Visual upgrade | ปรับรอบนี้: เปิดมุมมองให้เห็นแผนที่โรงพยาบาล 512×288 เต็มฉาก, เพิ่ม original pixel-art props สำหรับต้นไม้ น้ำพุ รถพยาบาล ม้านั่ง โคมไฟ แปลงดอกไม้และป้ายทาง, เพิ่มรายละเอียดพื้น/หน้าต่าง และเพิ่มแอนิเมชันคนไข้เข้าตำแหน่ง |
+| 1 · Visual upgrade | ปรับรอบนี้: เพิ่ม character atlas 6 บทบาท × 4 ทิศ × 4 เฟรมเดิน (เฟรมต้นฉบับ 32×48 พิกเซล), แทน canvas-วาดตัวละครเดิม โดยคงขนาดแสดงผล/hitbox เดิม; เพิ่ม PixelFX cyan acquisition burst หลังจบ X-ray |
 | 2 · RPG systems | ทำแล้ว: XP/level/SP, 20-node skill tree, inventory, equipment, collection, shop, crafting, save migration and zone-specific player positions |
 | 3 · Quest system | ทำแล้วใน vertical slice: main, side, daily, hidden-cache quests, rewards, relationship counters และ story journal 5 บท |
 | 4 · Radiology gameplay | เล่นจบได้: Chest PA, patient verification, positioning/pose, collimation, timing, synthetic image review, quality feedback |
@@ -38,11 +39,11 @@ npm run build       # ตรวจ TypeScript และสร้าง productio
 npm run preview     # เปิดดู production build ในเครื่อง
 ```
 
-การตรวจรอบนี้: `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright ผ่าน flow เควสต์, เคส X-ray, rewards, chapter completion, Noise Lab encounters, ซื้อ/สวม cosmetic, E ค้างรอเข้า range และเปิดบทสนทนาครั้งเดียว, prompt เกาะเป้าหมาย และ movement vector จากจอยสัมผัส. ตรวจ 1920×1080, iPad จำลอง 1024×768 / 1180×820 / 1366×1024 และมือถือ 390×844; browser console ไม่มี error. การทดสอบเป็น browser emulation ไม่ใช่เครื่อง iPad จริง. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
+การตรวจรอบนี้: `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright ผ่าน full gameplay regression รวม X-ray, rewards, chapter, shop และ dungeon; เก็บภาพใหม่ที่ 1440×900 และ 1024×768 แล้วตรวจว่าไม่มี browser error ระหว่างเข้า mission. ก่อนหน้านี้มีการทดสอบ responsive ที่ 1920×1080, iPad จำลอง 1024×768 / 1180×820 / 1366×1024 และมือถือ 390×844; browser emulation ไม่ใช่เครื่อง iPad จริง. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
 
 ## งานภาพและแหล่ง asset
 
-พร็อพและฉากโรงพยาบาลเป็นงานต้นฉบับใน `scripts/draw-hospital-world.py` และ `scripts/draw-hospital-props.py` ส่วนห้อง X-ray ใช้พื้นผิว ผังอุปกรณ์ และ sprite sheet ตัวละครแยกกันจาก `scripts/draw-xray-room.py` ทุกภาพวาดและ export ด้วย Astra Pixel Art; ไฟล์ runtime อยู่ใน `public/assets/` และภาพต้นฉบับ 2× อยู่ใน `pixelart/exports/` โดยเก็บต้นฉบับที่แก้ต่อได้ไว้ในสคริปต์และ `pixelart/session.jsonl`. ภาพอ้างอิงจากเจ้าของใช้กำกับองค์ประกอบเท่านั้น ไม่ได้ใช้เป็นฉากหลังหรือดึง asset จากเกมอื่น. ดูที่มาและสถานะ license ได้ใน [ASSET_CATALOG.md](ASSET_CATALOG.md).
+พร็อพและฉากโรงพยาบาลเป็นงานต้นฉบับใน `scripts/draw-hospital-world.py`, `scripts/draw-hospital-props.py` และ `scripts/draw-hospital-people.py`; ตัวละครในโลกใช้ sprite sheet 96 เฟรมความละเอียด 4× แล้วลดแสดงผลให้ footprint ตรงกับฟิสิกส์เดิม ห้อง X-ray ใช้ art ที่แยกชั้นจาก `scripts/draw-xray-room.py`. งานวาดและ export ใช้ Astra Pixel Art; แผ่นเอฟเฟกต์ cyan หลังรับภาพมาจาก PixelFX `pickups/collect-burst` และปรับ palette ให้เข้ากับเกม. ไฟล์ runtime อยู่ใน `public/assets/`, master อยู่ใน `pixelart/exports/`, และขั้นตอนวาดอยู่ในสคริปต์/`pixelart/session.jsonl`. ภาพอ้างอิงใช้กำกับองค์ประกอบเท่านั้น. ดูที่มาและ license ใน [ASSET_CATALOG.md](ASSET_CATALOG.md) และ [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ### สกิลสำหรับ AI ที่ทำงานต่อ
 
@@ -79,14 +80,14 @@ public/
 ```
 
 - `src/game/hospital-scene.ts`: tile-based courtyard, camera, Arcade collisions, NPCs, keyboard and touch interaction.
-- Character atlas uses 64×96 source frames scaled to the original 16×24 world footprint, with shaded hair/skin, distinct outfits, fine facial/uniform pixels and alternating walk frames. `hospital-world.png` is original 1024×576 pixel art (2× world size) rendered behind the collision map; 96×96 portraits are layered PNG art.
+- Character atlas uses 128×192 source cells (32×48 authored pixels at 4×) scaled to the same 19.2×28.8 world footprint and collision body as before; the 96 frames cover six roles, four facings, and four walk poses. `hospital-world.png` is original 1024×576 pixel art (2× world size) rendered behind the collision map; 96×96 portraits are layered PNG art.
 - `src/game/room-scene.ts`: original pixel-art X-ray room scene.
 - `src/ui/app.ts`: quest state, dialogue, case mini-games, scoring and local saves.
 - `src/game/cases.ts` / `simulation.ts`: fictional case descriptions and deterministic game scoring/image generation.
 - `src/game/content.ts` / `progression.ts`: data catalog, 20 skills, quests, story chapters, item drops and schema-5 local save migration.
 - `src/game/dungeon-scene.ts`: single-player Lost Imaging Lab, authored movement/collision and knowledge encounters.
 - `src/game/network/contracts.ts`: type-only boundary for future presence/party/co-op/leaderboard transport; no real online connection.
-- `scripts/draw-pixel-portraits.py`, `scripts/draw-hospital-world.py` and `scripts/draw-xray-room.py`: reproducible artwork scripts for the Astra Pixel Art skill; editable exports/state are under `pixelart/exports/`.
+- `scripts/draw-pixel-portraits.py`, `scripts/draw-hospital-world.py`, `scripts/draw-hospital-people.py` and `scripts/draw-xray-room.py`: reproducible artwork scripts for the Astra Pixel Art skill; editable exports/state are under `pixelart/exports/`.
 
 ## การบันทึก
 
@@ -116,7 +117,7 @@ npx --yes gh-pages@6.3.0 -d dist -b gh-pages
 | สกิว | ที่มา/สถานะ | ใช้กับงานนี้ |
 |---|---|---|
 | `phaser-engineer` | `C:/Users/phumshop/.codex/skills/phaser-engineer` | ใช้ออกแบบ Phaser scenes, physics, input และ save schema |
-| `pixelfx` | [patch-gg/pixelfx](https://github.com/patch-gg/pixelfx), `skills/pixelfx` | ใช้เอฟเฟกต์ confetti ในเกม; MIT, ดู notices ใน repo |
+| `pixelfx` | [patch-gg/pixelfx](https://github.com/patch-gg/pixelfx), `skills/pixelfx` | ใช้ confetti และ `collect-burst` ที่ปรับเป็น cyan สำหรับผลรับภาพ X-ray; MIT, ดู notices ใน repo |
 | `astra-pixel-art` | [Shanghaitech-DataTech/PixelSkill](https://github.com/Shanghaitech-DataTech/PixelSkill), `skills/astra-pixel-art` | ติดตั้งไว้ที่ `C:/Users/phumshop/.agents/skills/astra-pixel-art`; ใช้วาดภาพพอร์ตเทรต 96×96 แบบ layered PNG ด้วย Python มาตรฐาน (MIT) |
 | `spritecast` | [Sunghwan0112/spritecast](https://github.com/Sunghwan0112/spritecast), `skills/spritecast` | มีในเครื่อง/ตรวจวิธีใช้แล้ว; ยังไม่สร้าง asset เพราะ pipeline สร้างภาพใช้ API แบบคิดค่าใช้จ่ายและไม่ได้จำเป็นกับงานโค้ดพิกเซลชุดนี้ |
 | `img2threejs` | [img2threejs/img2threejs](https://github.com/img2threejs/img2threejs), repository root `SKILL.md` | มีในเครื่อง/ตรวจแล้ว; ไม่ใช้เพราะเกมนี้เป็น 2D pixel และไม่มีโมเดล 3D |
@@ -149,4 +150,4 @@ JEV ใช้เป็นตัวช่วยตัดสินใจแบบ 
 
 ## Credits
 
-PixelFX confetti effect distributed under MIT. รายละเอียด license/attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), `public/assets/pixelfx-LICENSE.txt`, `public/assets/pixelfx-NOTICE.md`. ภาพพอร์ตเทรต 96×96 เป็น PNG แบบ layered วาดด้วย Astra Pixel Art; สคริปต์วาดอยู่ใน `scripts/draw-pixel-portraits.py` และไฟล์แก้ไข/preview อยู่ใต้ `pixelart/exports/`. ฉากและตัวละครในเกมวาดด้วยโค้ด/SVG ของโปรเจกต์ ไม่ได้ดึงภาพจาก reference มาใช้เป็น asset.
+PixelFX confetti และ `pickups/collect-burst` ที่ recolor palette เป็น cyan แจกจ่ายภายใต้ MIT. รายละเอียด license/attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), `public/assets/pixelfx-LICENSE.txt`, `public/assets/pixelfx-NOTICE.md`. ภาพพอร์ตเทรตและสไปรต์ตัวละครหลักเป็นภาพต้นฉบับจาก Astra Pixel Art; สคริปต์วาดและ master อยู่ใต้ `scripts/` และ `pixelart/exports/`. ฉากและตัวละครไม่ได้ดึงจากเกมอื่นหรือใช้ภาพ reference เป็น asset.

@@ -9,6 +9,10 @@ export class RoomScene extends Phaser.Scene {
   private patientBaseY = 0;
   private readonly handlePatientPose = (pose: 'rest' | 'clinical') => this.setPatientPose(pose);
   private readonly handleMissionComplete = () => {
+    const acquisition = this.add.sprite(this.patient.x, this.patient.y - 12, 'xray-acquisition')
+      .setDepth(9).setScale(.34).setAlpha(.82).setOrigin(.5, .87)
+      .play('xray-acquisition-burst');
+    acquisition.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => acquisition.destroy());
     const burst = this.add.sprite(160, 82, 'pixel-confetti').setDepth(10).setScale(.65).play('pixel-confetti-burst');
     burst.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => burst.destroy());
   };
@@ -18,6 +22,7 @@ export class RoomScene extends Phaser.Scene {
   preload() {
     const base = import.meta.env.BASE_URL;
     this.load.spritesheet('pixel-confetti', `${base}assets/pixelfx-confetti.png`, { frameWidth: 200, frameHeight: 140 });
+    this.load.atlas('xray-acquisition', `${base}assets/pixelfx-xray-acquisition.png`, `${base}assets/pixelfx-xray-acquisition.json`);
     this.load.image('xray-room-walls', `${base}assets/xray-room-walls.png`);
     this.load.image('xray-equipment', `${base}assets/xray-equipment.png`);
     this.load.spritesheet('xray-actors', `${base}assets/xray-actors-strip.png`, { frameWidth: 88, frameHeight: 112 });
@@ -35,6 +40,9 @@ export class RoomScene extends Phaser.Scene {
     }
     if (!this.anims.exists('pixel-confetti-burst')) {
       this.anims.create({ key: 'pixel-confetti-burst', frames: this.anims.generateFrameNumbers('pixel-confetti', { start: 0, end: 102 }), frameRate: 24, repeat: 0 });
+    }
+    if (!this.anims.exists('xray-acquisition-burst')) {
+      this.anims.create({ key: 'xray-acquisition-burst', frames: this.anims.generateFrameNames('xray-acquisition', { prefix: 'collect-burst ', start: 0, end: 41 }), frameRate: 30, repeat: 0 });
     }
 
     // Feet share a stable bottom-center anchor. The patient entrance now uses

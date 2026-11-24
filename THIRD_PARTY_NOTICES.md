@@ -2,6 +2,6 @@
 
 ## PixelFX
 
-This project includes the rendered sprite sheet and metadata for the `ui/confetti` effect from PixelFX by patch-gg. The PixelFX project is licensed under the MIT License. The included license and source notice are in `public/assets/pixelfx-LICENSE.txt` and `public/assets/pixelfx-NOTICE.md`.
+This project includes rendered sprite sheets and metadata for the `ui/confetti` and `pickups/collect-burst` effects from [PixelFX by patch-gg](https://github.com/patch-gg/pixelfx). The `collect-burst` palette was recolored cyan for the simulated acquisition-complete cue. PixelFX and the included adapted effects are licensed under MIT; Copyright (c) 2026 Patch and Hugo Duprez. The included license and source notice are in `public/assets/pixelfx-LICENSE.txt` and `public/assets/pixelfx-NOTICE.md`.
 
 The Phaser 3 game framework is installed from npm as a runtime dependency under its MIT license; it is not vendored into this repository.

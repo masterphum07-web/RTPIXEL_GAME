@@ -32,18 +32,19 @@ export class HospitalScene extends Phaser.Scene {
   preload(){
     this.load.image('hospital-world',`${import.meta.env.BASE_URL}assets/hospital-world.png`);
     this.load.image('hospital-props',`${import.meta.env.BASE_URL}assets/hospital-props.png`);
+    this.load.spritesheet('hospital-people',`${import.meta.env.BASE_URL}assets/hospital-people.png`,{frameWidth:128,frameHeight:192});
   }
 
   create(){
     this.cameras.main.setRoundPixels(true);
     this.physics.world.setBounds(0,0,MAP_W*TILE,MAP_H*TILE);
     this.add.image(0,0,'hospital-world').setOrigin(0).setScale(.5).setDepth(-10);
-    this.createPropFrames();this.createTiles(); this.createTileWorld(); this.createDecor(); this.createSpriteSheet();
+    this.createPropFrames();this.createTiles(); this.createTileWorld(); this.createDecor();
     this.game.events.on('player-outfit',this.handleOutfit);
     this.game.events.emit('request-player-outfit',(equipped:boolean)=>{this.coatEquipped=equipped;});
 
     this.player=this.physics.add.sprite(256,205,'hospital-people',32);
-    this.player.setScale(.3).setDepth(30).setCollideWorldBounds(true).setSize(34,37).setOffset(15,52);
+    this.player.setScale(.15).setDepth(30).setCollideWorldBounds(true).setSize(68,74).setOffset(30,104);
     this.player.setData('walkFrame',0);
     const walls=this.mapLayer;
     if(walls)this.physics.add.collider(this.player,walls);
@@ -224,105 +225,9 @@ export class HospitalScene extends Phaser.Scene {
     d.fillStyle(0x203962,1);d.fillRect(304,32,23,16);d.fillStyle(0x65b5e6,1);d.fillRect(306,34,19,11);d.fillStyle(0xb1edff,1);d.fillRect(308,36,8,2);d.fillRect(308,40,13,1);
   }
 
-  private createSpriteSheet(){
-    if(this.textures.exists('hospital-people'))return;
-    // Draw at 2× source detail, then scale to the same 16×24 world footprint.
-    // The extra source pixels let faces and uniforms hold finer pixel clusters.
-    const sourceScale=2,frameWidth=32*sourceScale,frameHeight=48*sourceScale,frameCount=6*4*4;
-    // Pack 8 frames per row so the high-detail atlas stays below common mobile texture limits.
-    const columns=8,rows=Math.ceil(frameCount/columns);
-    const tex=this.textures.createCanvas('hospital-people',frameWidth*columns,frameHeight*rows);if(!tex)return;
-    const c=tex.getContext();
-    const palettes=[
-      {hair:'#332633',hairHi:'#765052',skin:'#f1c2a4',skinShade:'#d8917e',top:'#f0f3f4',topShade:'#c8d7e6',pants:'#4c6595',trim:'#68c9ed',role:'mentor'},
-      {hair:'#493044',hairHi:'#98616c',skin:'#f2c4a8',skinShade:'#d9957f',top:'#e6f1f5',topShade:'#b7d2e0',pants:'#445b83',trim:'#58b7d9',role:'reception'},
-      {hair:'#2b2633',hairHi:'#68505a',skin:'#efc09f',skinShade:'#d28a78',top:'#2861ac',topShade:'#193f7d',pants:'#253d70',trim:'#52d8f5',role:'student'},
-      {hair:'#3d3034',hairHi:'#8f625d',skin:'#f1c5aa',skinShade:'#d89983',top:'#d9e7f0',topShade:'#a9bfd4',pants:'#8193ab',trim:'#91bde5',role:'patient'},
-      {hair:'#553f3b',hairHi:'#aa7963',skin:'#edbd9f',skinShade:'#d28a78',top:'#e3f1f2',topShade:'#b9d6d3',pants:'#55716e',trim:'#66d4c3',role:'nurse'},
-      {hair:'#272631',hairHi:'#63545a',skin:'#eec09f',skinShade:'#d08a77',top:'#edf1f5',topShade:'#c3d0de',pants:'#394c6e',trim:'#4f9dc7',role:'doctor'},
-    ];
-    const draw=(frame:number,kind:number,dir:number,walk:number)=>{
-      const ox=(frame%columns)*frameWidth,oy=Math.floor(frame/columns)*frameHeight,pal=palettes[kind];
-      const p=(x:number,y:number,w:number,h:number,col:string)=>{c.fillStyle=col;c.fillRect(ox+x*sourceScale,oy+y*sourceScale,w*sourceScale,h*sourceScale);};
-      const fine=(x:number,y:number,col:string)=>{c.fillStyle=col;c.fillRect(ox+x,oy+y,1,1);};
-      const sway=[0,1,0,-1][walk];
-      // A compact cast shadow anchors the 48 px sprite to the courtyard floor.
-      p(7,45,18,2,'#263c4d');p(10,45,12,1,'#40576a');
-      // Back hair silhouette and layered highlights.
-      p(9,3,14,2,'#201d2a');p(7,5,18,3,pal.hair);p(5,8,22,6,pal.hair);p(7,6,16,2,pal.hairHi);
-      p(6,11,4,9,'#272431');p(22,10,4,8,'#272431');p(8,13,3,10,pal.hair);p(21,12,3,10,pal.hair);
-      p(10,4,3,2,pal.hairHi);p(16,4,4,1,pal.hairHi);p(7,8,3,2,pal.hairHi);p(23,9,2,3,pal.hairHi);
-      if(kind===0){p(5,16,4,10,pal.hair);p(23,15,4,11,pal.hair);p(4,23,5,4,pal.hairHi);p(24,24,4,4,pal.hairHi);}
-      if(kind===1){p(21,3,5,5,'#272431');p(23,2,3,3,pal.hairHi);}
-      if(kind===4){p(10,2,3,3,pal.hairHi);p(19,2,4,2,pal.hairHi);}
-      if(kind===2){p(8,2,4,2,pal.hairHi);p(18,2,4,2,pal.hairHi);p(24,5,3,3,pal.hairHi);}
-      // Face direction: south, north, west, east. The back view keeps only hair and ears.
-      if(dir!==1){
-        p(9,11,2,5,pal.skinShade);p(23,11,2,5,pal.skinShade);p(10,9,14,13,pal.skin);p(11,10,12,2,'#f7d8bb');
-        p(10,17,2,3,'#e8a28d');p(22,17,2,3,'#e8a28d');p(13,20,8,1,pal.skinShade);
-        if(dir===0){
-          p(12,14,3,3,'#292737');p(19,14,3,3,'#292737');p(12,14,1,1,'#fff5df');p(19,14,1,1,'#fff5df');p(16,17,2,1,pal.skinShade);p(15,19,4,1,'#b96970');p(12,13,4,1,pal.hair);p(19,13,4,1,pal.hair);
-        }else if(dir===2){
-          p(11,14,3,3,'#292737');p(11,14,1,1,'#fff5df');p(14,17,2,1,pal.skinShade);p(12,19,4,1,'#b96970');
-        }else{
-          p(19,14,3,3,'#292737');p(21,14,1,1,'#fff5df');p(17,17,2,1,pal.skinShade);p(17,19,4,1,'#b96970');
-        }
-        // Soft pixel fringe, cropped over the forehead without hiding the eyes.
-        p(9,9,7,3,pal.hair);p(15,8,5,3,pal.hair);p(19,9,5,3,pal.hair);p(11,11,3,1,pal.hairHi);
-        // Fine highlights add eye sparkle, cheek texture, and individual hair strands.
-        fine(26,29,'#fff8e9');fine(40,29,'#fff8e9');fine(27,30,'#a9d9f4');fine(41,30,'#a9d9f4');
-        fine(22,38,'#f4a99b');fine(23,39,'#e9958a');fine(42,38,'#f4a99b');fine(41,39,'#e9958a');
-        fine(18,16,pal.hairHi);fine(21,17,pal.hairHi);fine(33,15,pal.hairHi);fine(37,17,pal.hairHi);fine(45,19,pal.hairHi);
-      }else{
-        p(10,10,14,12,pal.hair);p(11,12,12,3,pal.hairHi);p(11,22,12,2,pal.skinShade);
-      }
-      // Neck, shoulder silhouette, sleeves and garment layers.
-      p(13,22,6,4,pal.skinShade);p(14,22,4,3,pal.skin);
-      if(pal.role==='student'){
-        p(9,25,14,14,pal.top);p(7,26+sway,4,10,pal.topShade);p(21,26-sway,4,10,pal.topShade);p(10,26,12,2,'#3d7bd0');p(11,28,10,9,pal.top);
-        p(13,27,6,1,'#75a9f2');p(16,29,1,6,pal.trim);p(18,30,4,5,'#e3f3ff');p(19,31,2,2,'#3d81b9');
-        p(10,34,3,3,'#214d94');p(19,34,3,3,'#214d94');
-      }else if(pal.role==='patient'){
-        p(8,25,16,16,pal.top);p(6,26+sway,4,10,pal.topShade);p(22,26-sway,4,10,pal.topShade);p(10,27,12,12,'#eef5fa');p(12,29,8,2,'#c6d9e9');
-        for(const [x,y] of [[11,31],[16,34],[20,30],[13,37],[19,39],[9,35]])p(x,y,1,1,(x+y)%2?'#85a8d0':'#a4bfdd');
-        p(14,27,4,2,'#91abc6');
-      }else{
-        p(8,25,16,14,pal.top);p(6,26+sway,4,11,pal.topShade);p(22,26-sway,4,11,pal.topShade);p(10,26,12,12,'#f7f8f8');
-        p(13,25,6,4,pal.trim);p(14,28,4,1,'#e9f4f6');p(12,31,3,6,pal.topShade);p(17,31,3,6,pal.topShade);
-        p(15,29,2,7,pal.trim);p(11,30,2,1,'#9eb8d0');p(19,30,2,1,'#9eb8d0');p(12,35,2,3,'#fff');p(18,35,2,3,'#fff');
-        if(kind===0){p(22,29,3,4,'#dcecff');p(23,30,1,1,'#57bce3');p(23,32,1,1,'#e48b8e');}
-        if(kind===1){p(22,29,3,3,'#d9eff3');p(23,30,1,1,'#4daac8');p(9,28,2,3,'#6b8db2');}
-        if(kind===4){p(22,29,3,4,'#e5f4ed');p(23,30,1,2,'#43a88a');p(14,30,4,2,'#daf2eb');}
-        if(kind===5){p(22,29,3,4,'#dae9f4');p(23,30,1,2,'#357aa8');p(11,29,2,3,'#74a6c6');p(19,29,2,3,'#74a6c6');}
-        if(kind===5||kind===1){p(11,14,3,1,'#313446');p(19,14,3,1,'#313446');p(11,14,3,3,'#435367');p(19,14,3,3,'#435367');p(14,15,5,1,'#435367');}
-      }
-      // Legs use separate light/shade pixels so the walk cycle reads at native scale.
-      const leftLeg=walk===1?1:walk===3?-1:0,rightLeg=-leftLeg;
-      p(10+leftLeg,38,5,5,pal.pants);p(17+rightLeg,38,5,5,pal.pants);p(10+leftLeg,38,2,4,'#6885b6');p(18+rightLeg,38,2,4,'#6885b6');
-      p(8+leftLeg,43,7,3,'#26334f');p(17+rightLeg,43,7,3,'#26334f');p(7+leftLeg,44,8,2,'#f1eee8');p(17+rightLeg,44,8,2,'#f1eee8');
-      // Small color accents distinguish a radiology team without text-sized details.
-      if(kind===1){p(14,4,4,2,'#f5f4ef');p(15,3,2,4,'#e55261');p(12,5,8,1,'#f5f4ef');}
-      if(kind===5){p(13,13,3,1,'#d9ebf7');p(20,13,3,1,'#d9ebf7');}
-      // Crisp one-pixel tailoring marks remain visible in the high-resolution sheet.
-      if(kind===2||kind===3){
-        for(const [x,y] of [[22,56],[26,60],[39,57],[43,62],[23,69],[40,72],[28,77],[36,80]])fine(x,y,kind===2?'#9fd0ff':'#c8d9eb');
-        fine(32,57,'#eef5ff');fine(33,61,'#79dcf5');fine(24,75,'#648fd0');fine(43,75,'#648fd0');
-      }else{
-        fine(24,58,'#ffffff');fine(27,63,pal.trim);fine(41,58,'#ffffff');fine(38,63,pal.trim);
-        fine(29,67,pal.topShade);fine(35,70,pal.topShade);fine(29,74,'#eef6fb');fine(35,77,'#eef6fb');
-      }
-      if(kind===1||kind===4){fine(47,59,'#ffffff');fine(48,61,kind===1?'#5bbfe0':'#63d9bb');}
-      if(kind===5){fine(22,29,'#ffffff');fine(42,29,'#ffffff');fine(23,31,'#4c87ac');fine(41,31,'#4c87ac');}
-    };
-    // 4 facings × 4 walking frames for a readable 16-bit walk cycle.
-    for(let kind=0;kind<6;kind++)for(let dir=0;dir<4;dir++)for(let walk=0;walk<4;walk++)draw(kind*16+dir*4+walk,kind,dir,walk);
-    for(let frame=0;frame<frameCount;frame++)tex.add(String(frame),0,(frame%columns)*frameWidth,Math.floor(frame/columns)*frameHeight,frameWidth,frameHeight);
-    tex.refresh();
-  }
-
   private createNpc(group:Phaser.Physics.Arcade.Group,x:number,y:number,kind:number){
-    const npc=group.create(x,y,'hospital-people',kind*16) as Phaser.Physics.Arcade.Sprite;npc.setScale(.3).setDepth(y+4).setImmovable(true);
-    npc.setSize(34,37).setOffset(15,52);npc.setData('npc',true);
+    const npc=group.create(x,y,'hospital-people',kind*16) as Phaser.Physics.Arcade.Sprite;npc.setScale(.15).setDepth(y+4).setImmovable(true);
+    npc.setSize(68,74).setOffset(30,104);npc.setData('npc',true);
     const bob=this.tweens.add({targets:npc,y:y-1,duration:900+kind*80,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
     let idleFrame=0;this.time.addEvent({delay:800+kind*150,loop:true,callback:()=>{if(npc.active){idleFrame=1-idleFrame;npc.setFrame(kind*16+idleFrame);}}});
     return {npc,bob};

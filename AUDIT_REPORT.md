@@ -1,6 +1,13 @@
 # RADTECH PIXEL — Source Audit and Current Checkpoint
 
-Audit reference: local `main` checkout based on `482d5c5` before this update. Repository: `masterphum07-web/RTPIXEL_GAME`. The changes in this checkpoint are built and browser-tested; source push and Pages deployment are reported separately after review.
+Audit reference: local `main` checkout; the preceding art checkpoint was commit `4a39eb4`. Repository: `masterphum07-web/RTPIXEL_GAME`. The current sprite/effect update is built and browser-tested; source push and Pages deployment are reported separately.
+
+## Latest art checkpoint — 2026-11-24
+
+- Replaced the code-painted hospital sprite atlas with an original Astra-authored 96-frame sheet (six roles, four facings, four walk frames), while preserving its displayed footprint and scaled collision body.
+- Added a cyan-recolored PixelFX collect-burst after mission completion. It is a completion flourish, not an X-ray emission or clinical effect. MIT notice and license are retained.
+- `ART_REBUILD_REPORT.md` contains the before/after implementation audit and remaining visual work. Character pass is complete for this checkpoint; detailed patient pose set, independently rendered equipment and richer interiors remain incomplete.
+- `npm run build` and Playwright full game-flow regression passed; an X-ray viewport screenshot was captured at 1024×768 and a fresh hub screenshot at 1440×900. See the art report for the exact ignored QA paths.
 
 ## Runtime and deployment facts
 
@@ -22,6 +29,7 @@ Audit reference: local `main` checkout based on `482d5c5` before this update. Re
 - E interaction after this update: hold-to-enter-range, single activation, point-blank/front-facing target selection, wall-ray check and target-anchored prompt. Touch interaction uses the same target action.
 - Touch movement after this update: analog 360° joystick, dead zone, normalized speed, release/cancel cleanup and a separate touch E button; both hub and dungeon consume the same vector.
 - Original hub pixel art and newly authored prop atlas: tree, fountain, ambulance, bench, lamp, flowerbed and wayfinding sign.
+- Original six-role hospital character atlas with four facings/four walk frames; PixelFX acquisition completion cue integrated into the X-ray scene.
 
 ### INCOMPLETE
 
