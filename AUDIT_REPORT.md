@@ -5,9 +5,10 @@ Audit reference: local `main` checkout; the preceding art checkpoint was commit 
 ## Latest art checkpoint — 2026-11-24
 
 - Replaced the code-painted hospital sprite atlas with an original Astra-authored 96-frame sheet (six roles, four facings, four walk frames), while preserving its displayed footprint and scaled collision body.
+- Added left-arm, right-arm, both-arm and rest poses to the patient positioning mini-game and mirrored them in the X-ray patient sprite strip. Chest PA still requires the two-arm pose; wrong single-arm poses are accepted as choices but show corrective feedback.
 - Added a cyan-recolored PixelFX collect-burst after mission completion. It is a completion flourish, not an X-ray emission or clinical effect. MIT notice and license are retained.
 - `ART_REBUILD_REPORT.md` contains the before/after implementation audit and remaining visual work. Character pass is complete for this checkpoint; detailed patient pose set, independently rendered equipment and richer interiors remain incomplete.
-- `npm run build` and Playwright full game-flow regression passed; an X-ray viewport screenshot was captured at 1024×768 and a fresh hub screenshot at 1440×900. See the art report for the exact ignored QA paths.
+- `npm run build`, the focused patient-pose interaction check and Playwright full game-flow regression passed; an X-ray viewport screenshot was captured at 1024×768 and a fresh hub screenshot at 1440×900. See the art report for the exact ignored QA paths.
 
 ## Runtime and deployment facts
 

@@ -1,13 +1,15 @@
 import Phaser from 'phaser';
 
+type PatientPose = 'rest' | 'clinical' | 'left-up' | 'right-up';
+
 /** The radiography room uses independently layered pixel-art environment, equipment and actor assets. */
 export class RoomScene extends Phaser.Scene {
   private patient!: Phaser.GameObjects.Sprite;
   private radiographer!: Phaser.GameObjects.Sprite;
   private patientPoseTween?: Phaser.Tweens.Tween;
-  private patientPose: 'rest' | 'clinical' = 'rest';
+  private patientPose: PatientPose = 'rest';
   private patientBaseY = 0;
-  private readonly handlePatientPose = (pose: 'rest' | 'clinical') => this.setPatientPose(pose);
+  private readonly handlePatientPose = (pose: PatientPose) => this.setPatientPose(pose);
   private readonly handleMissionComplete = () => {
     const acquisition = this.add.sprite(this.patient.x, this.patient.y - 12, 'xray-acquisition')
       .setDepth(9).setScale(.34).setAlpha(.82).setOrigin(.5, .87)
@@ -57,12 +59,12 @@ export class RoomScene extends Phaser.Scene {
       duration: 1150,
       ease: 'Stepped',
       easeParams: [14],
-      onComplete: () => this.patient.setFrame(this.patientPose === 'clinical' ? 3 : 2),
+      onComplete: () => this.patient.setFrame(this.poseFrame(this.patientPose)),
     });
     // Restrained breathing idle keeps the patient alive without moving the feet.
     this.tweens.add({ targets: this.patient, y: { from: this.patientBaseY, to: this.patientBaseY - 1 }, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-    this.radiographer = this.add.sprite(87, 142, 'xray-actors', 4)
+    this.radiographer = this.add.sprite(87, 142, 'xray-actors', 7)
       .setOrigin(.5, 1).setScale(.5).setDepth(4);
     this.tweens.add({ targets: this.radiographer, y: { from: 142, to: 141 }, duration: 1500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
@@ -76,14 +78,21 @@ export class RoomScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.game.events.off('mission-complete', this.handleMissionComplete));
   }
 
-  private setPatientPose(pose: 'rest' | 'clinical') {
+  private poseFrame(pose: PatientPose) {
+    return ({ rest: 2, clinical: 3, 'left-up': 4, 'right-up': 5 } as const)[pose];
+  }
+
+  private setPatientPose(pose: PatientPose) {
     this.patientPose = pose;
     this.patientPoseTween?.stop();
     if (pose === 'clinical') {
-      this.patient.setFrame(3);
+      this.patient.setFrame(this.poseFrame(pose));
       this.patientPoseTween = this.tweens.add({ targets: this.patient, x: 185, duration: 230, yoyo: true, ease: 'Sine.easeInOut' });
+    } else if (pose === 'left-up' || pose === 'right-up') {
+      this.patient.setFrame(this.poseFrame(pose));
+      this.patientPoseTween = this.tweens.add({ targets: this.patient, x: pose === 'left-up' ? 181 : 185, duration: 180, yoyo: true, ease: 'Sine.easeInOut' });
     } else {
-      this.patient.setFrame(2);
+      this.patient.setFrame(this.poseFrame(pose));
       this.patientPoseTween = this.tweens.add({ targets: this.patient, x: 183, duration: 160, ease: 'Sine.easeOut' });
     }
   }

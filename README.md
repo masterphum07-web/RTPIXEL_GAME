@@ -15,7 +15,7 @@
 | 1 · Visual upgrade | ปรับรอบนี้: เพิ่ม character atlas 6 บทบาท × 4 ทิศ × 4 เฟรมเดิน (เฟรมต้นฉบับ 32×48 พิกเซล), แทน canvas-วาดตัวละครเดิม โดยคงขนาดแสดงผล/hitbox เดิม; เพิ่ม PixelFX cyan acquisition burst หลังจบ X-ray |
 | 2 · RPG systems | ทำแล้ว: XP/level/SP, 20-node skill tree, inventory, equipment, collection, shop, crafting, save migration and zone-specific player positions |
 | 3 · Quest system | ทำแล้วใน vertical slice: main, side, daily, hidden-cache quests, rewards, relationship counters และ story journal 5 บท |
-| 4 · Radiology gameplay | เล่นจบได้: Chest PA, patient verification, positioning/pose, collimation, timing, synthetic image review, quality feedback |
+| 4 · Radiology gameplay | เล่นจบได้: Chest PA, patient verification, positioning/pose (พักแขน/ซ้าย/ขวา/ยกสองแขน), collimation, timing, synthetic image review, quality feedback |
 | 5 · Combat | เล่นได้: Noise Slime, Motion Phantom, Noise King, HP, answer feedback, skill effects และ drops |
 | 6 · Dungeon | มี Noise Laboratory หนึ่งด่านที่เข้า/ออกและสู้ได้ครบ; ด่านอื่นยังเป็นแผน ไม่แสดงเป็น playable |
 | 7 · Story expansion | ระบบ chapter/relationship และบท 1–2 ต่อกับเควสต์/ดันเจียน; บท 3–5 และโซนต่อไปมี outline และเงื่อนไขล็อกไว้ |

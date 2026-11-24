@@ -223,7 +223,7 @@ print(save("xray-equipment", canvas=eq, scales=(1, 2)))
 
 # Consistent 44×56 logical-pixel frames; every actor shares the baseline and size.
 FRAME_W, FRAME_H = 88, 112
-actors = new_canvas(FRAME_W*5, FRAME_H, name="xray-actors")
+actors = new_canvas(FRAME_W*8, FRAME_H, name="xray-actors")
 INK="#17223D"; HAIR="#292532"; HAIR_MID="#57404A"; HAIR_LIT="#957075"
 SKIN="#F4C7AC"; SKIN_SHADOW="#D69583"; BLUE="#274F9A"; BLUE_MID="#3473C2"; BLUE_LIT="#73CFF0"
 COAT="#EDF1F4"; COAT_SHADE="#BCCBDD"; PANTS="#354B77"; SHOE="#E5EAF0"
@@ -266,14 +266,20 @@ def person(frame, outfit="patient", pose="rest", walk=0):
         actor_rect(frame, 35, 68, 4, 2, "#F4B84F")
         actor_rect(frame, 49, 69, 8, 2, "#1D3D77")
     # Arms are drawn into connected shoulder / sleeve / hand shapes.
-    if pose == "clinical" and outfit == "patient":
-        for x in (20, 57):
-            actor_rect(frame, x, 51, 12, 10, INK)
-            actor_rect(frame, x+2, 52, 8, 8, "#D5E1F1")
-            actor_rect(frame, x+3, 46, 6, 13, "#C5D5EA")
-            actor_rect(frame, x+4, 39, 5, 10, SKIN_SHADOW)
-            actor_rect(frame, x+5, 39, 3, 8, SKIN)
-            actor_rect(frame, x+3, 37, 7, 4, SKIN)
+    if pose in ("clinical", "left-up", "right-up") and outfit == "patient":
+        for x, raised in ((20, pose in ("clinical", "left-up")), (57, pose in ("clinical", "right-up"))):
+            if raised:
+                actor_rect(frame, x, 51, 12, 10, INK)
+                actor_rect(frame, x+2, 52, 8, 8, "#D5E1F1")
+                actor_rect(frame, x+3, 46, 6, 13, "#C5D5EA")
+                actor_rect(frame, x+4, 39, 5, 10, SKIN_SHADOW)
+                actor_rect(frame, x+5, 39, 3, 8, SKIN)
+                actor_rect(frame, x+3, 37, 7, 4, SKIN)
+            else:
+                actor_rect(frame, x, 55, 12, 18, INK)
+                actor_rect(frame, x+2, 56, 8, 14, "#D5E1F1")
+                actor_rect(frame, x+3, 67, 6, 14, SKIN_SHADOW)
+                actor_rect(frame, x+4, 68, 4, 11, SKIN)
     elif outfit=="tech":
         actor_rect(frame, 16, 56, 17, 12, INK)
         actor_rect(frame, 18, 57, 12, 8, BLUE_MID)
@@ -335,5 +341,8 @@ person(0, "patient", "rest", walk=3)
 person(1, "patient", "rest", walk=-3)
 person(2, "patient", "rest")
 person(3, "patient", "clinical")
-person(4, "tech", "profile")
+person(4, "patient", "left-up")
+person(5, "patient", "right-up")
+person(6, "patient", "rest")
+person(7, "tech", "profile")
 print(save("xray-actors-strip", canvas=actors, scales=(1, 2)))
