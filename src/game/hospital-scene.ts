@@ -4,7 +4,7 @@ type ContactKind='mentor'|'reception'|'radiologist'|'radiology-door'|'engineer'|
 interface Contact { x:number; y:number; kind:ContactKind; sprite?:Phaser.Physics.Arcade.Sprite; }
 const TILE=16, MAP_W=32, MAP_H=18;
 const TREE_ROOTS:[number,number][]=[[90,207],[151,210],[361,210],[423,207],[69,270],[466,270]];
-const STAGE_A_FRAME={playerScrubs:0,playerCoat:16,maya:32,reception:48} as const;
+const CHARACTER_FRAME={playerScrubs:0,playerCoat:16,maya:32,reception:48,patient:64,elias:80,nora:96,luna:112,kai:128} as const;
 
 /** Top-down, tile-based hospital courtyard. The world is authored at native pixel scale. */
 export class HospitalScene extends Phaser.Scene {
@@ -46,7 +46,7 @@ export class HospitalScene extends Phaser.Scene {
     this.game.events.on('player-outfit',this.handleOutfit);
     this.game.events.emit('request-player-outfit',(equipped:boolean)=>{this.coatEquipped=equipped;});
 
-    this.player=this.physics.add.sprite(256,205,'hospital-people-stage-a',STAGE_A_FRAME.playerScrubs);
+    this.player=this.physics.add.sprite(256,205,'hospital-people-stage-a',CHARACTER_FRAME.playerScrubs);
     // New 4x art is displayed at .1 so its 192x288 source frame retains the
     // existing 19.2x28.8 world footprint and the same effective Arcade body.
     this.player.setScale(.1).setDepth(30).setCollideWorldBounds(true).setSize(102,111).setOffset(45,156);
@@ -63,8 +63,8 @@ export class HospitalScene extends Phaser.Scene {
 
     this.contacts=[{x:306,y:156,kind:'mentor'},{x:185,y:172,kind:'reception'},{x:344,y:172,kind:'radiologist'},{x:256,y:126,kind:'radiology-door'},{x:116,y:172,kind:'librarian'},{x:394,y:172,kind:'engineer'},{x:370,y:215,kind:'student'},{x:78,y:210,kind:'quest-board'},{x:451,y:232,kind:'hidden-cache'},{x:468,y:120,kind:'lab-gate'}];
     const npcGroup=this.physics.add.group({allowGravity:false,immovable:true});
-    const mentor=this.createNpc(npcGroup,306,156,2,'hospital-people-stage-a').npc; const receptionist=this.createNpc(npcGroup,185,172,3,'hospital-people-stage-a').npc; const radiologist=this.createNpc(npcGroup,344,172,5).npc; this.createNpc(npcGroup,289,208,3);
-    const librarian=this.createNpc(npcGroup,116,172,4).npc; const engineer=this.createNpc(npcGroup,394,172,5).npc; const student=this.createNpc(npcGroup,370,215,2).npc;
+    const mentor=this.createNpc(npcGroup,306,156,2,'hospital-people-stage-a').npc; const receptionist=this.createNpc(npcGroup,185,172,3,'hospital-people-stage-a').npc; const radiologist=this.createNpc(npcGroup,344,172,5,'hospital-people-stage-a').npc; this.createNpc(npcGroup,289,208,4,'hospital-people-stage-a');
+    const librarian=this.createNpc(npcGroup,116,172,7,'hospital-people-stage-a').npc; const engineer=this.createNpc(npcGroup,394,172,6,'hospital-people-stage-a').npc; const student=this.createNpc(npcGroup,370,215,8,'hospital-people-stage-a').npc;
     for(const contact of this.contacts){contact.sprite=({mentor,reception:receptionist,radiologist,librarian,engineer,student} as Partial<Record<ContactKind,Phaser.Physics.Arcade.Sprite>>)[contact.kind];}
     // A student follows a short, deterministic courtyard patrol, adding life
     // without sending an NPC through walls or away from its interaction zone.
@@ -122,7 +122,7 @@ export class HospitalScene extends Phaser.Scene {
     const magnitude=Math.hypot(dx,dy);if(magnitude>1){dx/=magnitude;dy/=magnitude;}
     body.setVelocity(dx*68,dy*68);
     const moving=Boolean(dx||dy);
-    const frameBase=this.coatEquipped?STAGE_A_FRAME.playerCoat:STAGE_A_FRAME.playerScrubs;
+    const frameBase=this.coatEquipped?CHARACTER_FRAME.playerCoat:CHARACTER_FRAME.playerScrubs;
     if(moving){this.facing=Math.abs(dx)>Math.abs(dy)?(dx<0?2:3):(dy<0?1:0);const f=(Math.floor(_time/125)%4);this.player.setFrame(frameBase+this.facing*4+f);}
     else this.player.setFrame(frameBase+this.facing*4);
     if(_time-this.positionSaveClock>2000&&(Math.abs(this.player.x-this.lastSavedX)>3||Math.abs(this.player.y-this.lastSavedY)>3)){this.positionSaveClock=_time;this.lastSavedX=this.player.x;this.lastSavedY=this.player.y;this.game.events.emit('world-position',{zone:'academy',x:Math.round(this.player.x),y:Math.round(this.player.y)});}

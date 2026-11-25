@@ -1,12 +1,11 @@
 # Stage A original character prototypes for RADTECH PIXEL.
 # Drawn as 48x72 logical pixel art on a 4x canvas with Astra Pixel Art.
-# Output: four rows (Player scrubs, Player coat, Maya, Reception),
-# each with 4 facings x 4 walk frames. Keep remaining roster on the legacy atlas
-# until the owner approves this visual direction.
+# Output: nine rows covering the player outfit variants and all five additional roles,
+# each with 4 facings x 4 walk frames.
 
 UNIT = 4
 FW, FH = 48 * UNIT, 72 * UNIT
-DIRECTIONS, CYCLES, ROWS = 4, 4, 4
+DIRECTIONS, CYCLES, ROWS = 4, 4, 9
 sheet = new_canvas(FW * DIRECTIONS * CYCLES, FH * ROWS, name="hospital-people-stage-a")
 
 OUT = "#17223D"
@@ -32,6 +31,11 @@ VARIANTS = [
     dict(name="player-coat", hair="#292532", hairDark="#191D2D", hairMid="#57404A", hairLit="#957075", skin="#F4C7AC", top=WHITE, shade=WHITE_SHADE, trim=CYAN, pants="#20365F", outfit="coat", style="messy", clip="#F4B84F", tie=False),
     dict(name="maya", hair="#57353A", hairDark="#302631", hairMid="#955A5E", hairLit="#D29283", skin="#F5C7AC", top=WHITE, shade="#BCCBDD", trim=CYAN, pants="#334669", outfit="coat", style="ponytail", clip=GOLD, tie=False),
     dict(name="reception", hair="#634344", hairDark="#302632", hairMid="#A16B68", hairLit="#D9A08C", skin="#F4C7AC", top="#EAF4F5", shade="#B7D0D8", trim="#54C7D3", pants="#48627F", outfit="nurse", style="bob", clip="#D85C69", tie=False),
+    dict(name="patient", hair="#263347", hairDark="#192536", hairMid="#506781", hairLit="#8EAFC1", skin="#F1C7AC", top="#B9E5F0", shade="#78B9CE", trim="#F7FAF4", pants="#D7E9ED", outfit="gown", style="shortcrop", clip="#61C9DE", tie=False),
+    dict(name="elias", hair="#39343B", hairDark="#252631", hairMid="#77727A", hairLit="#C4B7A5", skin="#EFC2A5", top=WHITE, shade="#B8C7D6", trim="#4CBBD7", pants="#263958", outfit="doctor", style="sidepart", clip=GOLD, tie=True),
+    dict(name="nora", hair="#774536", hairDark="#392A31", hairMid="#B46B4C", hairLit="#E0A06E", skin="#F4C5A7", top="#267C80", shade="#185A68", trim="#64E0D3", pants="#243E59", outfit="engineer", style="bob", clip="#F4B84F", tie=False),
+    dict(name="luna", hair="#65413D", hairDark="#3B2A35", hairMid="#A96860", hairLit="#DCA18A", skin="#F5C9AA", top="#718C78", shade="#4F6D68", trim="#EAD7AE", pants="#46566B", outfit="librarian", style="braid", clip="#E4B767", tie=False),
+    dict(name="kai", hair="#604339", hairDark="#302834", hairMid="#9A6A4F", hairLit="#D2A079", skin="#F2C5A8", top="#315B84", shade="#203C68", trim="#E8B95D", pants="#263958", outfit="senior", style="swept", clip="#64D4E8", tie=False),
 ]
 
 def xy(frame, x, y):
@@ -131,6 +135,41 @@ def person(frame, variant, direction, stride):
         rect(frame, 32,48+bob,2,2,"#5295B9")
         line(frame, 14,52+bob,19,53+bob,"#74B7DB")
 
+    # Role-specific shape language and small props keep the new roles distinct
+    # even at their native 48x72 display size.
+    if p["outfit"] == "gown":
+        poly(frame, [(17,38+bob),(22,40+bob),(25,42+bob),(29,40+bob),(34,38+bob),(37,43+bob),(35,55+bob),(32,58+bob),(15,58+bob),(12,54+bob),(12,43+bob)], "#17223D")
+        poly(frame, [(18,39+bob),(23,41+bob),(25,43+bob),(28,41+bob),(33,39+bob),(35,44+bob),(33,54+bob),(31,56+bob),(16,56+bob),(14,53+bob),(14,44+bob)], p["top"])
+        poly(frame, [(16,42+bob),(19,41+bob),(20,53+bob),(16,54+bob)], p["shade"])
+        poly(frame, [(33,42+bob),(34,45+bob),(32,54+bob),(29,54+bob)], p["shade"])
+        line(frame,25,43+bob,25,55+bob,"#EAFBFC")
+        for px,py in ((20,45),(29,47),(22,51),(31,42)):
+            rect(frame,px,py+bob,2,2,"#69BDD1")
+        rect(frame,30,46+bob,3,5,"#EAF5F3");rect(frame,31,47+bob,1,1,p["clip"])
+    elif p["outfit"] in ("doctor", "engineer", "librarian", "senior"):
+        # Layered lapels, job-specific trims and badges over the tailored base.
+        if p["outfit"] == "doctor":
+            poly(frame,[(17,36+bob),(23,39+bob),(25,42+bob),(22,45+bob),(15,40+bob)],"#FFFFFF")
+            poly(frame,[(34,37+bob),(28,40+bob),(25,42+bob),(28,45+bob),(36,41+bob)],"#D9E4EC")
+            poly(frame,[(23,39+bob),(25,42+bob),(27,39+bob),(27,47+bob),(25,49+bob),(23,47+bob)],"#294365")
+            rect(frame,30,45+bob,4,5,"#EAF0F1");line(frame,31,46+bob,33,46+bob,GOLD)
+            line(frame,17,39+bob,20,43+bob,p["trim"]);line(frame,33,39+bob,30,43+bob,p["trim"])
+        elif p["outfit"] == "engineer":
+            line(frame,25,41+bob,25,53+bob,"#B7F6E8")
+            rect(frame,14,45+bob,5,7,"#267078");line(frame,15,47+bob,18,47+bob,"#A1F0E4")
+            rect(frame,30,44+bob,5,6,"#E6F0E9");rect(frame,31,45+bob,3,1,GOLD);rect(frame,32,47+bob,2,2,"#328B91")
+            line(frame,20,53+bob,30,53+bob,GOLD)
+        elif p["outfit"] == "librarian":
+            poly(frame,[(19,38+bob),(24,41+bob),(22,45+bob),(18,42+bob)],"#E9E1CC")
+            poly(frame,[(31,38+bob),(26,41+bob),(28,45+bob),(32,42+bob)],"#D9D1BC")
+            rect(frame,15,46+bob,5,6,"#82978A");line(frame,16,47+bob,19,47+bob,"#EDE2C9")
+            rect(frame,30,45+bob,4,5,"#F0EAD8");line(frame,31,46+bob,33,46+bob,p["clip"])
+        else:
+            poly(frame,[(23,40+bob),(25,43+bob),(27,40+bob),(27,47+bob),(25,49+bob),(23,47+bob)],"#F0EBDD")
+            line(frame,15,40+bob,18,39+bob,p["trim"]);line(frame,35,40+bob,32,39+bob,p["trim"])
+            rect(frame,15,46+bob,4,5,"#3E7097");line(frame,16,47+bob,18,47+bob,GOLD)
+            rect(frame,30,45+bob,5,6,"#EAF0ED");rect(frame,31,46+bob,3,1,GOLD);rect(frame,32,48+bob,2,2,"#4684AC")
+
     # Arms counter-swing with connected shoulders, sleeves, cuffs and hands.
     arm_swing = (0,2,0,-2)[stride]
     if direction in (0, 1):
@@ -144,12 +183,29 @@ def person(frame, variant, direction, stride):
         poly(frame, [(armx,38+bob),(armx+4,39+bob),(armx+5,48+bob+arm_swing),(armx+3,53+bob+arm_swing),(armx,51+bob+arm_swing)], p["shade"])
         rect(frame, armx+1,50+bob+arm_swing,4,4,p["skin"])
 
+    if p["outfit"] == "engineer":
+        if direction == 1:
+            rect(frame,30,39+bob,5,12,"#E3EEE9");rect(frame,31,41+bob,3,1,p["clip"]);line(frame,31,44+bob,33,44+bob,"#469A9C")
+        else:
+            px=33 if direction in (0,3) else 8
+            rect(frame,px,44+bob,7,9,"#E7F0EC");rect(frame,px+1,45+bob,5,1,p["clip"]);line(frame,px+1,48+bob,px+5,48+bob,"#40989A");rect(frame,px+2,51+bob,2,1,"#40989A")
+    elif p["outfit"] == "librarian":
+        if direction == 1:
+            rect(frame,29,43+bob,7,8,"#E9E1CC");rect(frame,30,44+bob,5,6,"#728B7C");line(frame,33,44+bob,33,50+bob,"#D9C89D")
+        else:
+            px=33 if direction in (0,3) else 8
+            rect(frame,px,45+bob,7,8,"#E9E1CC");rect(frame,px+1,46+bob,5,6,"#718C78");line(frame,px+3,46+bob,px+3,52+bob,"#D9C89D")
+
     # Hair/back silhouette first; 4 distinct face directions keep anatomy readable.
     if direction == 1:
-        if p["style"] == "ponytail":
+        if p["style"] in ("ponytail", "braid"):
             poly(frame, [(12,17),(13,10),(19,6),(27,6),(34,10),(37,18),(35,29),(31,33),(17,32),(13,27)], p["hairDark"])
             poly(frame, [(34,18),(39,17),(42,21),(39,26),(34,24)], p["hairMid"])
             line(frame, 38,19,40,21,p["hairLit"])
+            if p["style"] == "braid":
+                rect(frame,37,23,5,3,p["hair"]);rect(frame,38,26,4,3,p["hairMid"]);rect(frame,37,29,4,3,p["hair"]);rect(frame,38,32,3,3,p["clip"])
+        if p["style"] in ("sidepart", "swept"):
+            poly(frame,[(17,13),(22,8),(29,9),(34,13),(28,12),(24,15)],p["hairMid"]);line(frame,19,11,25,9,p["hairLit"])
         else:
             poly(frame, [(11,18),(13,10),(19,6),(27,6),(35,10),(38,18),(36,29),(32,34),(17,34),(13,29)], p["hairDark"])
         poly(frame, [(14,15),(17,9),(24,7),(31,10),(35,16),(32,23),(17,23)], p["hair"])
@@ -166,8 +222,12 @@ def person(frame, variant, direction, stride):
         poly(frame, [(14,15),(18,9),(27,8),(33,12),(35,18),(32,23),(18,22),(14,19)], p["hair"])
         poly(frame, [(17,12),(22,9),(29,10),(33,13),(26,12),(22,14)], p["hairMid"])
         line(frame, 19,10,22,9,p["hairLit"])
-        if p["style"] == "ponytail":
+        if p["style"] in ("ponytail", "braid"):
             poly(frame, [(31,19),(38,18),(41,23),(38,28),(32,26)], p["hairMid"])
+            if p["style"] == "braid":
+                rect(frame,38,24,4,3,p["hair"]);rect(frame,37,27,5,3,p["hairMid"]);rect(frame,38,30,4,3,p["hair"]);rect(frame,39,33,3,3,p["clip"])
+        if p["style"] in ("sidepart", "swept"):
+            line(frame,19,10,27,8,p["hairLit"]);line(frame,27,8,33,11,p["hairMid"])
         elif p["style"] == "bob":
             poly(frame, [(14,18),(12,23),(15,31),(19,34),(20,28),(17,23)], p["hair"])
         else:
@@ -179,6 +239,8 @@ def person(frame, variant, direction, stride):
         rect(frame, 32 if direction == 2 else 25,26,1,2,EYE_LIT)
         rect(frame, 20 if direction == 2 else 31,26,2,2,SKIN_SHADOW)
         line(frame, 27 if direction == 2 else 22,30,30 if direction == 2 else 25,30,"#A96670")
+        if p["outfit"] == "doctor":
+            rect(frame,28 if direction==2 else 21,21,6,1,"#374A62");rect(frame,29 if direction==2 else 22,21,1,7,"#374A62");rect(frame,33 if direction==2 else 26,21,1,7,"#374A62")
         # Fringe and hair accessory remain clear of the visible eye.
         poly(frame, [(13,17),(15,10),(20,7),(28,7),(35,11),(37,17),(33,16),(30,19),(26,15),(23,20),(20,16),(16,20)], p["hairDark"])
         poly(frame, [(16,13),(21,9),(28,10),(33,13),(29,12),(26,16),(23,13),(19,17)], p["hairMid"])
@@ -223,11 +285,13 @@ def person(frame, variant, direction, stride):
     poly(frame, [(15,13),(20,8),(27,8),(33,12),(30,12),(27,16),(24,12),(21,16),(18,14)], p["hairMid"])
     line(frame, 17,12,21,9,p["hairLit"])
     line(frame, 25,10,28,11,p["hairLit"])
-    if p["style"] == "ponytail":
+    if p["style"] in ("ponytail", "braid"):
         poly(frame, [(13,19),(12,25),(14,32),(17,34),(18,28),(16,23)], p["hair"])
         poly(frame, [(34,19),(36,25),(34,33),(31,34),(30,28),(32,23)], p["hairDark"])
         poly(frame, [(34,27),(39,27),(40,31),(36,33),(33,31)], p["hairMid"])
         rect(frame, 36,28,2,2,p["clip"])
+        if p["style"] == "braid":
+            rect(frame,36,31,4,3,p["hair"]);rect(frame,35,34,5,3,p["hairMid"]);rect(frame,36,37,4,3,p["hair"]);rect(frame,37,40,3,3,p["clip"])
     elif p["style"] == "bob":
         poly(frame, [(13,19),(12,24),(14,32),(18,35),(19,29),(16,23)], p["hair"])
         poly(frame, [(34,19),(36,24),(34,32),(30,35),(29,29),(32,23)], p["hair"])
@@ -241,6 +305,13 @@ def person(frame, variant, direction, stride):
         rect(frame, 23,7,4,2,"#D85C69")
     if variant == 2:
         rect(frame, 36,13,3,3,p["clip"])
+    if p["outfit"] == "doctor":
+        rect(frame,16,21,7,1,"#374A62");rect(frame,27,21,7,1,"#374A62")
+        rect(frame,17,21,1,7,"#374A62");rect(frame,22,21,1,7,"#374A62")
+        rect(frame,28,21,1,7,"#374A62");rect(frame,33,21,1,7,"#374A62")
+        line(frame,23,23,27,23,"#5D7085")
+    if p["style"] in ("sidepart", "swept"):
+        line(frame,17,11,25,8,p["hairLit"]);line(frame,25,8,31,10,p["hairMid"])
 
 for row, variant in enumerate(VARIANTS):
     for direction in range(DIRECTIONS):

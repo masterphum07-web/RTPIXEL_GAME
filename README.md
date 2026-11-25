@@ -13,7 +13,7 @@
 
 | Phase | สถานะใน build นี้ |
 |---|---|
-| 1 · Visual upgrade | มี atlas legacy 6 บทบาท และ Stage A prototype ใหม่ Player/Maya/Reception ที่ 48×72 logical px × 4 ทิศ × 4 เฟรม; Player scrubs/coat ใช้ identity เดียวกันและคงขนาดแสดงผล/hitbox เดิม; Stage A รอเจ้าของอนุมัติก่อนขยายอีก 5 ตัว; เพิ่ม PixelFX cyan acquisition burst หลังจบ X-ray |
+| 1 · Visual upgrade | atlas ตัวละครใหม่ 9 แถว: Player 2 ชุด, Maya, Reception, Patient, Dr. Elias, Nora, Luna และ Kai; แต่ละตัว 48×72 logical px × 4 ทิศ × 4 เฟรม พร้อม portrait 4 สีหน้า; Player scrubs/coat ใช้ identity เดียวกันและคง hitbox เดิม; เพิ่ม PixelFX cyan acquisition burst หลังจบ X-ray |
 | 2 · RPG systems | ทำแล้ว: XP/level/SP, 20-node skill tree, inventory, equipment, collection, shop, crafting, save migration and zone-specific player positions |
 | 3 · Quest system | ทำแล้วใน vertical slice: main, side, daily, hidden-cache quests, rewards, relationship counters และ story journal 5 บท |
 | 4 · Radiology gameplay | เล่นจบได้: Chest PA, patient verification, positioning/pose (พักแขน/ซ้าย/ขวา/ยกสองแขน), collimation, timing, synthetic image review, quality feedback |
@@ -44,11 +44,11 @@ npm run preview     # เปิดดู production build ในเครื่�
 
 ผลตรวจ re-audit (2026-11-25): `npm ci`, `npm run build`, `git diff --check` ผ่าน. Playwright headed Chromium ยืนยันคำสั่ง E ให้ตรงกับ target หลังสร้าง UI ใหม่, เปิดบทสนทนา Reception ได้ และแสดงประตูล็อกจนรับใบส่งตรวจ; 0 console errors / 0 warnings. ยังไม่ได้ทดสอบ full gameplay หรือ mobile ในรอบนั้น; ดู [AUDIT_REPORT.md](AUDIT_REPORT.md) สำหรับขอบเขตที่ตรวจและสิ่งที่ยังค้าง.
 
-ผลตรวจ Character Stage A (2026-11-25): `npm run build` ผ่าน; Playwright ตรวจหน้า Hub ที่ 1440×900, 1024×768, 844×390 และ 390×844; E เปิดบทสนทนาได้สำหรับ Maya และ Reception; portrait แสดงตัวละครตรงกัน; ไม่พบ asset โหลดล้มเหลวหรือ Phaser error (มี 404 ของ `/favicon.ico` เท่านั้น). ดู [ART_REBUILD_REPORT.md](ART_REBUILD_REPORT.md); X-ray scene และการสวมเสื้อกาวน์ยังไม่ได้ทดสอบผ่าน UI ในรอบนี้.
+ผลตรวจ character roster (2026-11-25): `npm run build` ผ่าน; Playwright เปิด Hub ที่ 1440×900, พบ NPC 7 ตัวใช้ atlas ใหม่ครบ และกด E เปิด dialogue ของ Elias, Nora, Luna, Kai ได้พร้อม portrait ตรงตัวละคร; ไม่มี browser console/request errors ในรอบนี้. X-ray scene, เสื้อกาวน์ และ iPad จริงยังไม่ได้ตรวจใน pass นี้. ดู [ART_REBUILD_REPORT.md](ART_REBUILD_REPORT.md).
 
 ## งานภาพและแหล่ง asset
 
-พร็อพและฉากโรงพยาบาลเป็นงานต้นฉบับใน `scripts/draw-hospital-world.py`, `scripts/draw-hospital-props.py` และ `scripts/draw-hospital-people.py`; ตัวละครในโลกใช้ sprite sheet 96 เฟรมความละเอียด 4× แล้วลดแสดงผลให้ footprint ตรงกับฟิสิกส์เดิม ห้อง X-ray ใช้ art ที่แยกชั้นจาก `scripts/draw-xray-room.py`. งานวาดและ export ใช้ Astra Pixel Art; PixelFX `pickups/collect-burst` ทำวงแสงหลังรับภาพจำลอง และ `impacts/hit-spark` ที่ปรับ palette cyan/blue เป็น feedback เมื่อวิเคราะห์ Noise Lab ถูกต้อง. ไฟล์ runtime อยู่ใน `public/assets/`, master อยู่ใน `pixelart/exports/`, และขั้นตอนวาดอยู่ในสคริปต์/`pixelart/session.jsonl`. ภาพอ้างอิงใช้กำกับองค์ประกอบเท่านั้น. ดูที่มาและ license ใน [ASSET_CATALOG.md](ASSET_CATALOG.md) และ [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+พร็อพและฉากโรงพยาบาลเป็นงานต้นฉบับใน `scripts/draw-hospital-world.py`, `scripts/draw-hospital-props.py` และ `scripts/draw-character-prototypes.py`; atlas ตัวละครใหม่มี 144 เฟรมที่ความละเอียด 4× และลดแสดงผลให้ footprint/physics เดิม. Portrait scripts อยู่ใน `scripts/draw-pixel-portraits.py`; ห้อง X-ray ใช้ art แยกชั้นจาก `scripts/draw-xray-room.py`. งานวาดและ export ใช้ Astra Pixel Art; PixelFX `pickups/collect-burst` ทำวงแสงหลังรับภาพจำลอง และ `impacts/hit-spark` ที่ปรับ palette cyan/blue เป็น feedback เมื่อวิเคราะห์ Noise Lab ถูกต้อง. ไฟล์ runtime อยู่ใน `public/assets/`, master อยู่ใน `pixelart/exports/`. ภาพอ้างอิงใช้กำกับองค์ประกอบเท่านั้น. ดูที่มาและ license ใน [ASSET_CATALOG.md](ASSET_CATALOG.md) และ [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ### สกิลสำหรับ AI ที่ทำงานต่อ
 

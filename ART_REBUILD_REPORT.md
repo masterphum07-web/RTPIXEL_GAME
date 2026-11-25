@@ -1,8 +1,33 @@
 # RADTECH PIXEL — Art Rebuild Checkpoint
 
-Updated: 2026-11-25 · Character Stage A prototype
+Updated: 2026-11-25 · Full character roster art pass
 
-## Latest checkpoint — Character Art Rebuild Stage A
+## Latest checkpoint — Full Character Roster
+
+The owner requested the remaining five character designs after Stage A was pushed. The five roles are now being authored as original pixel art and integrated into the existing hospital roster.
+
+- Patient: short dark hair, patterned pale-blue gown, light footwear, soft teal palette.
+- Dr. Elias: charcoal side-part, glasses, tie, white coat and ID badge.
+- Nora: copper bob, teal utility uniform, tool clipboard.
+- Luna: long auburn braid, sage cardigan and book.
+- Kai: chestnut swept hair, navy senior-student jacket and lanyard.
+- The atlas is nine 48×72 logical-pixel rows × four facings × four walk frames (192×288 source pixels per frame). Nine rows include both Player outfit states plus all seven other character roles.
+- Added four matching portrait expressions (default/smile, neutral, talk, concern) for each new character and wired dialogue portrait selection for Elias, Nora, Luna and Kai. Patient portraits are available for later dialogue use.
+- Hospital NPCs now select their dedicated atlas rows. Player costume rows, rendering scale and Arcade body dimensions are preserved; quest/gameplay code and save schema are untouched.
+- JEV was called live for a bounded patient/staff art-direction choice. It favored a light-blue patient gown and role-specific silhouettes. Exact results and usage are in `JEV_DECISION_LOG.md`.
+- Astra Pixel Art was invoked to generate the atlas and portrait variants from the checked-in scripts. The five-role previews are `output/roster-sprites-preview.png` and `output/roster-portraits-preview.png` (local QA artifacts only).
+- `npm run build`: passed after the roster integration. Vite only reported the pre-existing large JavaScript chunk warning.
+- Headless Chromium / Playwright at 1440×900: all seven hospital NPC sprites loaded from the new atlas; E target selection and the matching talk portraits passed for Elias, Nora, Luna and Kai; 0 page errors, console errors or failed requests.
+- Captured the live hub at `output/playwright/character-roster-hub-1440x900.png` and reviewed both sprite/portrait contact sheets. Local-only previews: `output/roster-sprites-preview.png`, `output/roster-portraits-preview.png`.
+- Not exercised in this pass: X-ray scene, coat equip UI, iPad hardware, movement/collision regression, and full quest/save flow. No production deploy or merge was performed.
+
+### Skills used for this pass
+
+- `astra-pixel-art`: invoked to render all five new sprite rows and 20 portrait variants.
+- `radtech-pixel-art-direction`, `sprite-pipeline`, `phaser-engineer`, `game-playtest`, `playwright`, and `jev-system-one`: applied from the existing project setup; JEV received a new live request in this pass.
+- No paid generation, new third-party assets, or gameplay-system changes.
+
+## Historical checkpoint — Character Art Rebuild Stage A
 
 ### 1. Current visual problems
 

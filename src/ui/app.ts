@@ -46,7 +46,7 @@ function shopPanel(){return windowPanel('NORA · EQUIPMENT SHOP','ร้าน�
 function worldMapPanel(){return windowPanel('RADIANT CITY · FIELD MAP','แผนที่พื้นที่',`<div class="zone-grid">${ZONES.map(z=>`<article class="zone-card ${z.status}"><span>${z.icon}</span><b>${z.name}</b><small>${z.level}</small><p>${z.description}</p>${z.id==='academy'?'<strong>กำลังสำรวจ</strong>':z.id==='noise-lab'?`<button data-action="enter-dungeon" ${profile.questStep>=5?'':'disabled'}>${profile.questStep>=5?'เข้า Noise Laboratory':'ทำ First Exposure ก่อน'}</button>`:'<strong>ยังไม่เปิดใน build นี้</strong>'}</article>`).join('')}</div><p class="quest-data-note">แผนที่ขยายตามเนื้อหาที่เล่นได้จริง พื้นที่ที่ยังพัฒนาจะไม่แสดงเป็นด่านพร้อมเล่น</p>`);}
 function worldScreen(){
   const menu=view!=='hub'&&view!=='dungeon';
-  const dialoguePortrait=dialogueKind==='mentor'?'mentor-portrait-talk':dialogueKind==='reception'?'receptionist-portrait-talk':'mentor-portrait';
+  const dialoguePortrait=dialogueKind==='mentor'?'mentor-portrait-talk':dialogueKind==='reception'?'receptionist-portrait-talk':dialogueKind==='radiologist'?'elias-portrait-talk':dialogueKind==='engineer'?'nora-portrait-talk':dialogueKind==='librarian'?'luna-portrait-talk':dialogueKind==='student'?'kai-portrait-talk':'mentor-portrait';
   let panel='';
   if(view==='library')panel=questPanel();
   if(view==='skills')panel=skillPanel();

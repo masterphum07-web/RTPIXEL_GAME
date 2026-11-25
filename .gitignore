@@ -2,7 +2,9 @@ node_modules/
 dist/
 .playwright-cli/
 output/playwright/
+output/roster-*-preview.png
 *.tsbuildinfo
+scripts/__pycache__/
 .env
 .env.*
 !.env.example

@@ -17,3 +17,11 @@
 - **Decision B — coat identity:** `separate-costume-frames`, confidence `1.00`; returned probabilities: separate costume frames `1.00`, runtime tint `0.00`, reuse doctor row `0.00`.
 - **Usage metadata:** 733 input / 116 output tokens. No request ID was returned.
 - **Application:** create a reversible 48×72 Stage A candidate, preserve the Player's identity by using distinct scrubs/coat rows from one art master, and retain 32×48 / 40×64 / 48×72 comparison. JEV's frame-size confidence is low; do not expand the remaining cast before owner approval.
+
+## 2026-11-25 · Remaining five character identities
+
+- **Use:** live TypeSafe JavaScript SDK `@typesafe-ai/sdk@0.7.0`, model `jev-1.14.0`; bounded visual-design choice after inspecting the existing sprite and portrait scripts.
+- **Decision A — patient design:** `light_blue_gown`, confidence `0.44`; probabilities returned: light-blue gown `0.63`, warm clinic `0.09`, cool patient `0.28`.
+- **Decision B — staff silhouettes:** `role_silhouettes`, confidence `0.85`; probabilities returned: role-specific silhouettes `0.90`, bright palette `0.04`, natural palette `0.06`.
+- **Usage metadata:** 752 input / 93 output tokens. No request ID was returned.
+- **Application:** Patient uses a pale-blue patterned gown; Dr. Elias uses side-parted dark hair, glasses, tie and coat; Nora gets copper bob, teal workwear and a tool clipboard; Luna gets a long braid, sage cardigan and book; Kai gets chestnut swept hair and a navy senior-student jacket. This is art direction only; deterministic gameplay and clinical content remain unchanged.
