@@ -3,6 +3,8 @@ import Phaser from 'phaser';
 type ContactKind='mentor'|'reception'|'radiologist'|'radiology-door'|'engineer'|'librarian'|'student'|'quest-board'|'hidden-cache'|'lab-gate';
 interface Contact { x:number; y:number; kind:ContactKind; sprite?:Phaser.Physics.Arcade.Sprite; }
 const TILE=16, MAP_W=32, MAP_H=18;
+const TREE_ROOTS:[number,number][]=[[90,207],[151,210],[361,210],[423,207],[69,270],[466,270]];
+const CHARACTER_FRAME={playerScrubs:0,playerCoat:16,maya:32,reception:48,patient:64,elias:80,nora:96,luna:112,kai:128} as const;
 
 /** Top-down, tile-based hospital courtyard. The world is authored at native pixel scale. */
 export class HospitalScene extends Phaser.Scene {
@@ -33,6 +35,7 @@ export class HospitalScene extends Phaser.Scene {
     this.load.image('hospital-world',`${import.meta.env.BASE_URL}assets/hospital-world.png`);
     this.load.image('hospital-props',`${import.meta.env.BASE_URL}assets/hospital-props.png`);
     this.load.spritesheet('hospital-people',`${import.meta.env.BASE_URL}assets/hospital-people.png`,{frameWidth:128,frameHeight:192});
+    this.load.spritesheet('hospital-people-stage-a',`${import.meta.env.BASE_URL}assets/hospital-people-stage-a.png`,{frameWidth:192,frameHeight:288});
   }
 
   create(){
@@ -43,8 +46,10 @@ export class HospitalScene extends Phaser.Scene {
     this.game.events.on('player-outfit',this.handleOutfit);
     this.game.events.emit('request-player-outfit',(equipped:boolean)=>{this.coatEquipped=equipped;});
 
-    this.player=this.physics.add.sprite(256,205,'hospital-people',32);
-    this.player.setScale(.15).setDepth(30).setCollideWorldBounds(true).setSize(68,74).setOffset(30,104);
+    this.player=this.physics.add.sprite(256,205,'hospital-people-stage-a',CHARACTER_FRAME.playerScrubs);
+    // New 4x art is displayed at .1 so its 192x288 source frame retains the
+    // existing 19.2x28.8 world footprint and the same effective Arcade body.
+    this.player.setScale(.1).setDepth(30).setCollideWorldBounds(true).setSize(102,111).setOffset(45,156);
     this.player.setData('walkFrame',0);
     const walls=this.mapLayer;
     if(walls)this.physics.add.collider(this.player,walls);
@@ -53,12 +58,13 @@ export class HospitalScene extends Phaser.Scene {
     this.addBlocker(props,210,152,30,9); // waiting seats
     this.addBlocker(props,373,153,32,12); // bench
     this.addBlocker(props,88,160,22,27); // bus shelter
+    for(const [x,y] of TREE_ROOTS)this.addBlocker(props,x,y-8,13,7); // tree trunks
     this.physics.add.collider(this.player,props);
 
     this.contacts=[{x:306,y:156,kind:'mentor'},{x:185,y:172,kind:'reception'},{x:344,y:172,kind:'radiologist'},{x:256,y:126,kind:'radiology-door'},{x:116,y:172,kind:'librarian'},{x:394,y:172,kind:'engineer'},{x:370,y:215,kind:'student'},{x:78,y:210,kind:'quest-board'},{x:451,y:232,kind:'hidden-cache'},{x:468,y:120,kind:'lab-gate'}];
     const npcGroup=this.physics.add.group({allowGravity:false,immovable:true});
-    const mentor=this.createNpc(npcGroup,306,156,0).npc; const receptionist=this.createNpc(npcGroup,185,172,1).npc; const radiologist=this.createNpc(npcGroup,344,172,5).npc; this.createNpc(npcGroup,289,208,3);
-    const librarian=this.createNpc(npcGroup,116,172,4).npc; const engineer=this.createNpc(npcGroup,394,172,5).npc; const student=this.createNpc(npcGroup,370,215,2).npc;
+    const mentor=this.createNpc(npcGroup,306,156,2,'hospital-people-stage-a').npc; const receptionist=this.createNpc(npcGroup,185,172,3,'hospital-people-stage-a').npc; const radiologist=this.createNpc(npcGroup,344,172,5,'hospital-people-stage-a').npc; this.createNpc(npcGroup,289,208,4,'hospital-people-stage-a');
+    const librarian=this.createNpc(npcGroup,116,172,7,'hospital-people-stage-a').npc; const engineer=this.createNpc(npcGroup,394,172,6,'hospital-people-stage-a').npc; const student=this.createNpc(npcGroup,370,215,8,'hospital-people-stage-a').npc;
     for(const contact of this.contacts){contact.sprite=({mentor,reception:receptionist,radiologist,librarian,engineer,student} as Partial<Record<ContactKind,Phaser.Physics.Arcade.Sprite>>)[contact.kind];}
     // A student follows a short, deterministic courtyard patrol, adding life
     // without sending an NPC through walls or away from its interaction zone.
@@ -101,7 +107,7 @@ export class HospitalScene extends Phaser.Scene {
   }
 
   private addHospitalProp(frame:string,x:number,y:number){
-    return this.add.image(x,y,'hospital-props',frame).setOrigin(.5,1).setScale(.5).setDepth(5);
+    return this.add.image(x,y,'hospital-props',frame).setOrigin(.5,1).setScale(frame==='tree'?.62:.5).setDepth(y);
   }
 
   update(_time:number,delta:number){
@@ -116,12 +122,13 @@ export class HospitalScene extends Phaser.Scene {
     const magnitude=Math.hypot(dx,dy);if(magnitude>1){dx/=magnitude;dy/=magnitude;}
     body.setVelocity(dx*68,dy*68);
     const moving=Boolean(dx||dy);
-    const frameBase=(this.coatEquipped?5:2)*16;
+    const frameBase=this.coatEquipped?CHARACTER_FRAME.playerCoat:CHARACTER_FRAME.playerScrubs;
     if(moving){this.facing=Math.abs(dx)>Math.abs(dy)?(dx<0?2:3):(dy<0?1:0);const f=(Math.floor(_time/125)%4);this.player.setFrame(frameBase+this.facing*4+f);}
     else this.player.setFrame(frameBase+this.facing*4);
     if(_time-this.positionSaveClock>2000&&(Math.abs(this.player.x-this.lastSavedX)>3||Math.abs(this.player.y-this.lastSavedY)>3)){this.positionSaveClock=_time;this.lastSavedX=this.player.x;this.lastSavedY=this.player.y;this.game.events.emit('world-position',{zone:'academy',x:Math.round(this.player.x),y:Math.round(this.player.y)});}
     if(!moving&&delta>0){body.setVelocity(0,0);}
     const target=this.findInteractionTarget();
+    this.player.setDepth(this.player.y+10);
     this.interactionPrompt.setVisible(Boolean(target));
     if(target){this.interactionPrompt.setPosition(target.sprite?.x??target.x,(target.sprite?.y??target.y)-18);this.interactionPrompt.setText(`${target.kind==='radiology-door'?'E · ENTER':'E · TALK'}`);}
     this.game.events.emit('interaction-target',target?.kind??null);
@@ -191,7 +198,7 @@ export class HospitalScene extends Phaser.Scene {
     const rect=(x:number,y:number,w:number,h:number,color:number)=>{d.fillStyle(color,1);d.fillRect(x,y,w,h);};
     // The exact 32×18 tile world remains fully visible at the configured camera size.
     // Original, transparent Astra Pixel Art cutouts provide foreground depth.
-    for(const [x,y] of [[88,188],[112,190],[402,191],[430,189],[92,255],[410,254]])this.addHospitalProp('tree',x+9,y+31);
+    for(const [x,y] of TREE_ROOTS)this.addHospitalProp('tree',x,y);
     this.addHospitalProp('fountain',256,229);this.addHospitalProp('ambulance',26,116);
     this.addHospitalProp('streetlamp',124,191);this.addHospitalProp('streetlamp',365,191);
     this.addHospitalProp('bench',396,160);this.addHospitalProp('wayfinding',124,170);
@@ -225,11 +232,13 @@ export class HospitalScene extends Phaser.Scene {
     d.fillStyle(0x203962,1);d.fillRect(304,32,23,16);d.fillStyle(0x65b5e6,1);d.fillRect(306,34,19,11);d.fillStyle(0xb1edff,1);d.fillRect(308,36,8,2);d.fillRect(308,40,13,1);
   }
 
-  private createNpc(group:Phaser.Physics.Arcade.Group,x:number,y:number,kind:number){
-    const npc=group.create(x,y,'hospital-people',kind*16) as Phaser.Physics.Arcade.Sprite;npc.setScale(.15).setDepth(y+4).setImmovable(true);
-    npc.setSize(68,74).setOffset(30,104);npc.setData('npc',true);
+  private createNpc(group:Phaser.Physics.Arcade.Group,x:number,y:number,kind:number,texture='hospital-people'){
+    const stageA=texture==='hospital-people-stage-a';
+    const frameBase=kind*16;
+    const npc=group.create(x,y,texture,frameBase) as Phaser.Physics.Arcade.Sprite;npc.setScale(stageA?.1:.15).setDepth(y+4).setImmovable(true);
+    npc.setSize(stageA?102:68,stageA?111:74).setOffset(stageA?45:30,stageA?156:104);npc.setData('npc',true);
     const bob=this.tweens.add({targets:npc,y:y-1,duration:900+kind*80,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
-    let idleFrame=0;this.time.addEvent({delay:800+kind*150,loop:true,callback:()=>{if(npc.active){idleFrame=1-idleFrame;npc.setFrame(kind*16+idleFrame);}}});
+    let idleFrame=0;this.time.addEvent({delay:800+kind*150,loop:true,callback:()=>{if(npc.active){idleFrame=1-idleFrame;npc.setFrame(frameBase+idleFrame);}}});
     return {npc,bob};
   }
 

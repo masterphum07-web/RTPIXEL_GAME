@@ -24,6 +24,7 @@ export class DungeonScene extends Phaser.Scene {
   private held=false;
   private cleared=false;
   private coatEquipped=false;
+  private pendingHit:{x:number;y:number}|null=null;
   private positionSaveClock=0;
   private lastSavedX=0;
   private lastSavedY=0;
@@ -36,12 +37,17 @@ export class DungeonScene extends Phaser.Scene {
   private readonly handleOutfit=(equipped:boolean)=>{this.coatEquipped=equipped;};
   constructor(){super('dungeon');}
 
+  preload(){
+    const base=import.meta.env.BASE_URL;
+    this.load.atlas('combat-hit-spark',`${base}assets/pixelfx-hit-spark.png`,`${base}assets/pixelfx-hit-spark.json`);
+  }
+
   create(){
     this.enemies=enemies.map(enemy=>({...enemy}));this.activeEnemy=0;this.encounterOpen=false;this.cleared=false;this.held=false;
     this.game.events.emit('request-player-outfit',(equipped:boolean)=>{this.coatEquipped=equipped;});
-    this.game.events.emit('request-world-position',(position:{x:number;y:number}|null)=>{if(position&&Number.isFinite(position.x)&&Number.isFinite(position.y))this.player.setPosition(Phaser.Math.Clamp(position.x,18,494),Phaser.Math.Clamp(position.y,18,270));});
     this.game.events.on('player-outfit',this.handleOutfit);
     this.cameras.main.setRoundPixels(true);this.physics.world.setBounds(0,0,512,288);
+    if(!this.anims.exists('combat-hit-spark-burst'))this.anims.create({key:'combat-hit-spark-burst',frames:this.anims.generateFrameNames('combat-hit-spark',{prefix:'hit-spark ',start:0,end:15}),frameRate:30,repeat:0});
     const bg=this.add.graphics().setDepth(-5);
     bg.fillStyle(0x10182f).fillRect(0,0,512,288);
     // Pixel tiled lab floor, alternating cool stone panels and cyan seams.
@@ -61,6 +67,7 @@ export class DungeonScene extends Phaser.Scene {
     this.block(walls,256,4,512,8);this.block(walls,256,284,512,8);this.block(walls,4,144,8,288);this.block(walls,508,144,8,288);
     this.block(walls,162,74,8,132);this.block(walls,162,228,8,104);this.block(walls,306,40,8,65);this.block(walls,306,196,8,168);
     this.player=this.physics.add.sprite(42,238,'hospital-people',32).setScale(.25).setDepth(20).setCollideWorldBounds(true).setSize(40,44).setOffset(12,48);
+    this.game.events.emit('request-world-position',(position:{x:number;y:number}|null)=>{if(position&&Number.isFinite(position.x)&&Number.isFinite(position.y))this.player.setPosition(Phaser.Math.Clamp(position.x,18,494),Phaser.Math.Clamp(position.y,18,270));});
     this.physics.add.collider(this.player,walls);this.cameras.main.startFollow(this.player,true,.16,.16);this.cameras.main.setBounds(0,0,512,288);
     this.keys={W:this.input.keyboard!.addKey('W'),A:this.input.keyboard!.addKey('A'),S:this.input.keyboard!.addKey('S'),D:this.input.keyboard!.addKey('D'),UP:this.input.keyboard!.addKey('UP'),DOWN:this.input.keyboard!.addKey('DOWN'),LEFT:this.input.keyboard!.addKey('LEFT'),RIGHT:this.input.keyboard!.addKey('RIGHT'),E:this.input.keyboard!.addKey('E')};
     this.input.keyboard!.on('keydown-E',this.handleKeyInteract);
@@ -106,8 +113,15 @@ export class DungeonScene extends Phaser.Scene {
     const enemy=this.enemies[this.activeEnemy],question=ENCOUNTER_QUESTIONS[this.questionIndex];
     if(choice!==question.answer){this.game.events.emit('combat-result',{correct:false,feedback:question.feedback,enemy,question,skill});return;}
     const boost=(skill==='noise-detection'&&question.topic==='noise'||skill==='anatomy-scan'&&question.topic==='artifact')?1:0;
-    enemy.hp-=1+boost;this.game.events.emit('combat-result',{correct:true,feedback:question.feedback,enemy,question,skill});
+    enemy.hp-=1+boost;this.pendingHit={x:enemy.x,y:enemy.y};this.game.events.emit('combat-result',{correct:true,feedback:question.feedback,enemy,question,skill});
     if(enemy.hp<=0){this.enemiesLive[this.activeEnemy]?.setVisible(false);this.activeEnemy++;this.game.events.emit('monster-defeated',{id:enemy.id,boss:enemy.boss,name:enemy.name});if(this.activeEnemy>=enemies.length){this.cleared=true;this.game.events.emit('dungeon-cleared');}}
   }
-  public closeEncounter(){this.encounterOpen=false;}
+  public closeEncounter(){
+    this.encounterOpen=false;
+    if(this.pendingHit){
+      const hit=this.add.sprite(this.pendingHit.x,this.pendingHit.y,'combat-hit-spark').setOrigin(44/136,64/80).setScale(.48).setDepth(this.pendingHit.y+30).play('combat-hit-spark-burst');
+      hit.once(Phaser.Animations.Events.ANIMATION_COMPLETE,()=>hit.destroy());
+      this.pendingHit=null;
+    }
+  }
 }

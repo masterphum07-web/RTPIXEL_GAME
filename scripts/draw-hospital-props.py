@@ -19,6 +19,25 @@ a.rect(20, 25, 4, 3, "#8ac36a")
 a.rect(35, 22, 5, 3, "#a1cb72")
 a.rect(44, 33, 3, 4, "#76b75f")
 a.rect(27, 46, 3, 2, "#a5d07b")
+# Layered leaf clusters add the irregular canopy silhouettes and cool rim light
+# visible in the reference, while keeping the original 64×80 frame bounds.
+for cx, cy, rx, ry, shade in [
+    (19, 24, 6, 5, "#3b8653"), (29, 18, 7, 5, "#5b9e60"),
+    (40, 21, 6, 5, "#498e55"), (47, 31, 5, 6, "#3a8050"),
+    (16, 39, 5, 6, "#34774d"), (27, 48, 7, 5, "#3c8652"),
+    (39, 45, 7, 5, "#34774d"), (34, 31, 8, 7, "#34794d"),
+]:
+    a.ellipse(cx, cy, rx, ry, shade)
+for x, y, shade in [
+    (18, 25, "#a4d277"), (22, 21, "#78b765"), (29, 17, "#c0d982"),
+    (34, 19, "#88bf68"), (41, 22, "#a6ce72"), (47, 29, "#83bb67"),
+    (15, 39, "#8fc16b"), (21, 45, "#72ad5e"), (30, 50, "#94c66d"),
+    (39, 46, "#77b15d"), (45, 40, "#9ac96e"),
+]:
+    a.rect(x, y, 3, 2, shade)
+a.rect(24, 24, 2, 2, "#d5e693")
+a.rect(37, 27, 2, 2, "#c8df8d")
+a.rect(31, 40, 2, 2, "#b6d77d")
 
 # 1: garden fountain, 128×80 source pixels = 64×40 world pixels.
 a.ellipse(128, 70, 56, 7, "#172b3a80")
@@ -40,6 +59,16 @@ a.rect(112, 57, 4, 2, "#d5f9ff")
 a.rect(140, 43, 5, 2, "#d5f9ff")
 a.rect(78, 58, 4, 5, "#e994ad")
 a.rect(174, 57, 4, 5, "#f2ca69")
+# Broken fountain highlights read as moving water without turning the prop into
+# a flat cyan disc; the short glints are separately animated in Phaser too.
+a.rect(113, 48, 8, 2, "#c0f6ff")
+a.rect(136, 51, 10, 2, "#b5f2ff")
+a.rect(117, 57, 6, 2, "#31a7d5")
+a.rect(137, 58, 8, 2, "#2d9ccd")
+a.rect(124, 18, 2, 6, "#e7ffff")
+a.rect(131, 10, 2, 6, "#c4f8ff")
+a.rect(119, 25, 3, 3, "#a7eff8")
+a.rect(136, 28, 3, 3, "#b3f5fc")
 
 # 2: ambulance, 128×80 source pixels = 64×40 world pixels.
 a.ellipse(256, 70, 56, 5, "#172b3a80")
@@ -105,8 +134,18 @@ for x, y, petal in [(68, 35, "#ed94ad"), (84, 40, "#ffd36c"), (102, 34, "#e8a4c1
     lower.rect(x + 2, y - 2, 3, 3, "#f8d66f")
     lower.rect(x - 3, y + 2, 3, 3, "#32734d")
     lower.rect(x + 6, y + 1, 3, 4, "#377b50")
+# Leaf fans and alternating stone edging give the planting strip a more
+# hand-laid, garden-bed feel while preserving the same prop atlas crop.
+for x, y in [(72, 38), (91, 45), (111, 37), (128, 47), (148, 38), (160, 45)]:
+    lower.rect(x, y, 3, 6, "#2c6847")
+    lower.rect(x - 3, y + 1, 3, 2, "#5ba35b")
+    lower.rect(x + 3, y + 2, 3, 2, "#70b45e")
+    lower.rect(x - 1, y - 2, 2, 2, "#91c96b")
 lower.rect(63, 51, 101, 3, "#bda48d")
 lower.rect(66, 54, 95, 2, "#5c5362")
+for x in range(65, 163, 12):
+    lower.rect(x, 52, 6, 2, "#d8c1a4")
+    lower.rect(x + 6, 53, 3, 1, "#8f7c75")
 
 # 6: department wayfinding sign, 96×64 source pixels = 48×32 world pixels.
 lower.ellipse(224, 58, 42, 4, "#172b3a80")

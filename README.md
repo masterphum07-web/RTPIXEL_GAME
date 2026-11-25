@@ -5,6 +5,7 @@
 ดู [ROADMAP.md](ROADMAP.md) สำหรับแผนพัฒนาต่อแบบ MMORPG ตั้งแต่แก้ input, ขยายล็อบบี้/ร้านค้า/เควสต์, ทำท่าผู้ป่วย ไปจนถึงระบบออนไลน์
 ดู [AUDIT_REPORT.md](AUDIT_REPORT.md) สำหรับสถานะจริงแยก WORKING / INCOMPLETE / BROKEN / MISSING และผลตรวจ build/browser ล่าสุด
 ดู [ART_REBUILD_REPORT.md](ART_REBUILD_REPORT.md) สำหรับ audit ภาพก่อนปรับ, character atlas ใหม่, การใช้ PixelFX และงานภาพที่ยังเหลือ
+ดู [JEV_DECISION_LOG.md](JEV_DECISION_LOG.md) สำหรับผลการเรียก JEV ที่ยืนยันจาก API จริงและเหตุผลการตัดสินใจ
 
 > สถานะ: playable single-player prototype มีโลกโรงพยาบาล ภารกิจแรก มินิเกมฝึก และระบบบันทึกในเครื่อง ยังไม่มี backend หรือ multiplayer
 
@@ -12,7 +13,7 @@
 
 | Phase | สถานะใน build นี้ |
 |---|---|
-| 1 · Visual upgrade | ปรับรอบนี้: เพิ่ม character atlas 6 บทบาท × 4 ทิศ × 4 เฟรมเดิน (เฟรมต้นฉบับ 32×48 พิกเซล), แทน canvas-วาดตัวละครเดิม โดยคงขนาดแสดงผล/hitbox เดิม; เพิ่ม PixelFX cyan acquisition burst หลังจบ X-ray |
+| 1 · Visual upgrade | atlas ตัวละครใหม่ 9 แถว: Player 2 ชุด, Maya, Reception, Patient, Dr. Elias, Nora, Luna และ Kai; แต่ละตัว 48×72 logical px × 4 ทิศ × 4 เฟรม พร้อม portrait 4 สีหน้า; Player scrubs/coat ใช้ identity เดียวกันและคง hitbox เดิม; เพิ่ม PixelFX cyan acquisition burst หลังจบ X-ray |
 | 2 · RPG systems | ทำแล้ว: XP/level/SP, 20-node skill tree, inventory, equipment, collection, shop, crafting, save migration and zone-specific player positions |
 | 3 · Quest system | ทำแล้วใน vertical slice: main, side, daily, hidden-cache quests, rewards, relationship counters และ story journal 5 บท |
 | 4 · Radiology gameplay | เล่นจบได้: Chest PA, patient verification, positioning/pose (พักแขน/ซ้าย/ขวา/ยกสองแขน), collimation, timing, synthetic image review, quality feedback |
@@ -39,11 +40,15 @@ npm run build       # ตรวจ TypeScript และสร้าง productio
 npm run preview     # เปิดดู production build ในเครื่อง
 ```
 
-การตรวจรอบนี้: `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright ผ่าน full gameplay regression และกดปุ่ม E บนจอเพื่อไปจาก lobby ผ่าน Reception เข้าห้อง X-ray บน desktop และ iPad emulation. ปุ่มมองเห็นและกดได้ที่ 1440×900, 1024×768, 390×844, แนวนอน 844×390 และจอ 390×844 แบบเมาส์; ไม่พบ browser error. การทดสอบเป็น browser emulation ไม่ใช่เครื่อง iPad จริง. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
+ผลตรวจ checkpoint ก่อนหน้า (2026-11-24): `npm run build` ผ่านด้วย TypeScript และ Vite; Playwright ผ่าน full gameplay regression และกดปุ่ม E บนจอเพื่อไปจาก lobby ผ่าน Reception เข้าห้อง X-ray บน desktop และ iPad emulation. ปุ่มมองเห็นและกดได้ที่ 1440×900, 1024×768, 390×844, แนวนอน 844×390 และจอ 390×844 แบบเมาส์; ไม่พบ browser error. การทดสอบเป็น browser emulation ไม่ใช่เครื่อง iPad จริง. Vite เตือน JS bundle ใหญ่กว่า 500 kB; build ยังสำเร็จ.
+
+ผลตรวจ re-audit (2026-11-25): `npm ci`, `npm run build`, `git diff --check` ผ่าน. Playwright headed Chromium ยืนยันคำสั่ง E ให้ตรงกับ target หลังสร้าง UI ใหม่, เปิดบทสนทนา Reception ได้ และแสดงประตูล็อกจนรับใบส่งตรวจ; 0 console errors / 0 warnings. ยังไม่ได้ทดสอบ full gameplay หรือ mobile ในรอบนั้น; ดู [AUDIT_REPORT.md](AUDIT_REPORT.md) สำหรับขอบเขตที่ตรวจและสิ่งที่ยังค้าง.
+
+ผลตรวจ character roster (2026-11-25): `npm run build` ผ่าน; Playwright เปิด Hub ที่ 1440×900, พบ NPC 7 ตัวใช้ atlas ใหม่ครบ และกด E เปิด dialogue ของ Elias, Nora, Luna, Kai ได้พร้อม portrait ตรงตัวละคร; ไม่มี browser console/request errors ในรอบนี้. X-ray scene, เสื้อกาวน์ และ iPad จริงยังไม่ได้ตรวจใน pass นี้. ดู [ART_REBUILD_REPORT.md](ART_REBUILD_REPORT.md).
 
 ## งานภาพและแหล่ง asset
 
-พร็อพและฉากโรงพยาบาลเป็นงานต้นฉบับใน `scripts/draw-hospital-world.py`, `scripts/draw-hospital-props.py` และ `scripts/draw-hospital-people.py`; ตัวละครในโลกใช้ sprite sheet 96 เฟรมความละเอียด 4× แล้วลดแสดงผลให้ footprint ตรงกับฟิสิกส์เดิม ห้อง X-ray ใช้ art ที่แยกชั้นจาก `scripts/draw-xray-room.py`. งานวาดและ export ใช้ Astra Pixel Art; แผ่นเอฟเฟกต์ cyan หลังรับภาพมาจาก PixelFX `pickups/collect-burst` และปรับ palette ให้เข้ากับเกม. ไฟล์ runtime อยู่ใน `public/assets/`, master อยู่ใน `pixelart/exports/`, และขั้นตอนวาดอยู่ในสคริปต์/`pixelart/session.jsonl`. ภาพอ้างอิงใช้กำกับองค์ประกอบเท่านั้น. ดูที่มาและ license ใน [ASSET_CATALOG.md](ASSET_CATALOG.md) และ [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+พร็อพและฉากโรงพยาบาลเป็นงานต้นฉบับใน `scripts/draw-hospital-world.py`, `scripts/draw-hospital-props.py` และ `scripts/draw-character-prototypes.py`; atlas ตัวละครใหม่มี 144 เฟรมที่ความละเอียด 4× และลดแสดงผลให้ footprint/physics เดิม. Portrait scripts อยู่ใน `scripts/draw-pixel-portraits.py`; ห้อง X-ray ใช้ art แยกชั้นจาก `scripts/draw-xray-room.py`. งานวาดและ export ใช้ Astra Pixel Art; PixelFX `pickups/collect-burst` ทำวงแสงหลังรับภาพจำลอง และ `impacts/hit-spark` ที่ปรับ palette cyan/blue เป็น feedback เมื่อวิเคราะห์ Noise Lab ถูกต้อง. ไฟล์ runtime อยู่ใน `public/assets/`, master อยู่ใน `pixelart/exports/`. ภาพอ้างอิงใช้กำกับองค์ประกอบเท่านั้น. ดูที่มาและ license ใน [ASSET_CATALOG.md](ASSET_CATALOG.md) และ [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ### สกิลสำหรับ AI ที่ทำงานต่อ
 
@@ -118,8 +123,9 @@ npx --yes gh-pages@6.3.0 -d dist -b gh-pages
 |---|---|---|
 | `phaser-engineer` | `C:/Users/phumshop/.codex/skills/phaser-engineer` | ใช้ออกแบบ Phaser scenes, physics, input และ save schema |
 | `pixelfx` | [patch-gg/pixelfx](https://github.com/patch-gg/pixelfx), `skills/pixelfx` | ใช้ confetti และ `collect-burst` ที่ปรับเป็น cyan สำหรับผลรับภาพ X-ray; MIT, ดู notices ใน repo |
-| `astra-pixel-art` | [Shanghaitech-DataTech/PixelSkill](https://github.com/Shanghaitech-DataTech/PixelSkill), `skills/astra-pixel-art` | ติดตั้งไว้ที่ `C:/Users/phumshop/.agents/skills/astra-pixel-art`; ใช้วาดภาพพอร์ตเทรต 96×96 แบบ layered PNG ด้วย Python มาตรฐาน (MIT) |
+| `astra-pixel-art` | [Shanghaitech-DataTech/PixelSkill](https://github.com/Shanghaitech-DataTech/PixelSkill), `skills/astra-pixel-art` | ติดตั้งไว้ที่ `C:/Users/phumshop/.agents/skills/astra-pixel-art`; ใช้วาด sprite 48×72 logical px และ portrait 96×96 แบบ layered PNG ด้วย Python มาตรฐาน (MIT) |
 | `spritecast` | [Sunghwan0112/spritecast](https://github.com/Sunghwan0112/spritecast), `skills/spritecast` | มีในเครื่อง/ตรวจวิธีใช้แล้ว; ยังไม่สร้าง asset เพราะ pipeline สร้างภาพใช้ API แบบคิดค่าใช้จ่ายและไม่ได้จำเป็นกับงานโค้ดพิกเซลชุดนี้ |
+| `generate2dsprite`, `video2dsprite`, `generate2dmap`, `generate2dmedia`, `codeart2d` | [0x0funky/agent-sprite-forge](https://github.com/0x0funky/agent-sprite-forge), `skills/<skill>/SKILL.md`; MIT | ติดตั้งไว้ที่ `C:/Users/phumshop/.codex/skills/`; ใช้ทำ master sprite/props, แอนิเมชัน, map/tiles, ตรวจเส้นทางสื่อ และงาน code-drawn ตามข้อกำหนดของแต่ละสกิว; รองรับ export สำหรับเว็บ/Aseprite JSON ที่ Phaser ใช้ต่อได้ |
 | `img2threejs` | [img2threejs/img2threejs](https://github.com/img2threejs/img2threejs), repository root `SKILL.md` | มีในเครื่อง/ตรวจแล้ว; ไม่ใช้เพราะเกมนี้เป็น 2D pixel และไม่มีโมเดล 3D |
 | `jev-system-one` | local Codex skill `C:/Users/phumshop/.codex/skills/jev-system-one` | ใช้ JEV จริงตัดสินใจลำดับภารกิจ/การควบคุม ดูบันทึกด้านล่าง |
 | `playwright` | local Codex skill `C:/Users/phumshop/.codex/skills/playwright` | ใช้เปิดเกมใน browser, ตรวจปุ่ม/บทสนทนา และอ่าน console |
@@ -134,6 +140,7 @@ python $installer --repo patch-gg/pixelfx --path skills/pixelfx
 python $installer --repo Shanghaitech-DataTech/PixelSkill --path skills/astra-pixel-art --dest "$env:USERPROFILE/.agents/skills"
 python $installer --repo img2threejs/img2threejs --path . --name img2threejs
 python $installer --repo Sunghwan0112/spritecast --path skills/spritecast
+python $installer --repo 0x0funky/agent-sprite-forge --path skills/codeart2d skills/generate2dmap skills/generate2dmedia skills/generate2dsprite skills/video2dsprite
 # Optional PS2-only toolset; not needed for this browser game:
 python $installer --repo Jakeschincariol/console-skill --path console-anywhere console-backend console-controller console-graphics console-levels console-mod console-physics console-reverse console-saves console-sound console-tester
 ```
@@ -141,6 +148,12 @@ python $installer --repo Jakeschincariol/console-skill --path console-anywhere c
 หากต้องการชุดสกิว console เฉพาะงาน PS2 ให้ติดตั้งเป็นรายสกิวจาก `Jakeschincariol/console-skill` path `console-anywhere`, `console-backend`, `console-controller`, `console-graphics`, `console-levels`, `console-mod`, `console-physics`, `console-reverse`, `console-saves`, `console-sound` และ `console-tester` สกิวเหล่านี้ไม่จำเป็นต่อ RADTECH PIXEL
 
 `phaser-engineer`, `jev-system-one`, `playwright` และ `skill-installer` เป็นสกิว local/bundled ของเครื่อง Codex นี้ ไม่ใช่ GitHub repo ที่เกมควร vendor ลงมา ผู้รับช่วงควรเปิดสกิวเหล่านี้จาก Codex ของตน หรือใช้เอกสารนี้เป็นแนวทางหากไม่มี
+
+สกิว Agent Sprite Forge ติดตั้งแล้วใน Codex เครื่องนี้; ให้เริ่ม Codex turn ใหม่เพื่อโหลดสกิวก่อนใช้จริง โฟลเดอร์สกิวเรียกสคริปต์จากโฟลเดอร์พี่น้อง จึงควรติดตั้งทั้ง 5 โฟลเดอร์ไว้ข้างกันตามคำสั่งด้านบน งานสร้างตัวละคร/แผนที่อาจเรียก image หรือ video provider และมีค่าใช้จ่ายตาม route; ห้ามเรียก paid API หรือซื้อเครดิตโดยไม่มีการอนุมัติที่ชัดเจน ตรวจ output route/estimate และดูภาพ QC ก่อนนำ asset เข้าเกม ตัว dependency หลักคือ Python 3.10+, Pillow, NumPy; SciPy เป็นตัวเร่งเสริมและมี fallback ส่วน video export ต้องใช้ ffmpeg
+
+### เว็บช่วยทำ pixel art
+
+เว็บเหล่านี้เป็นเครื่องมือสร้าง/เกลาภาพภายนอก ไม่ได้แก้ไฟล์เกมให้อัตโนมัติ: export PNG หรือ sprite sheet แล้วค่อยจัด palette/ขนาด/alpha, ตรวจเฟรมและ import เข้า `public/assets/` พร้อมบันทึกที่มาและ license ใน `ASSET_CATALOG.md`. PixelLab ใช้ redraw ภาพที่มีเป็น pixel grid และ palette สม่ำเสมอ; pixie.haus ใช้สร้างภาพ/animation และแก้ใน editor (เก็บงานเป็น private); Perchance เหมาะกับภาพร่างแนวคิดเท่านั้นจนกว่าจะตรวจสิทธิ์ให้ชัด เพราะ FAQ เรื่อง AI output กับข้อกำหนดการใช้บริการมีถ้อยคำขัดกัน. ห้ามอัปโหลดข้อมูลผู้ป่วยจริงหรือ secrets. ไม่ถือว่าบัญชี/เครดิตฟรี/เครดิต paid ของเว็บใดได้รับอนุมัติหรือพร้อมใช้งานโดยอัตโนมัติ
 
 ### JEV record
 

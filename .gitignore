@@ -2,7 +2,9 @@ node_modules/
 dist/
 .playwright-cli/
 output/playwright/
+output/roster-*-preview.png
 *.tsbuildinfo
+scripts/__pycache__/
 .env
 .env.*
 !.env.example
@@ -10,3 +12,6 @@ output/playwright/
 pixelart/previews/
 pixelart/exports/xray-*.pixelart.json
 pixelart/exports/hospital-people.pixelart.json
+pixelart/exports/hospital-people-stage-a.pixelart.json
+pixelart/exports/*-portrait-*.pixelart.json
+pixelart/exports/receptionist-portrait.pixelart.json
